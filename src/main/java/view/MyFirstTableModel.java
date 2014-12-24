@@ -1,7 +1,7 @@
 package view;
 
+import service.BaseExcel;
 import service.Element;
-import service.WriteBaseFileTXT;
 
 import javax.swing.*;
 import javax.swing.event.TableModelListener;
@@ -123,11 +123,14 @@ public class MyFirstTableModel implements TableModel {
                 element.setCount((Integer)value);
                 break;
         }
-        //Запись "elements" в файл.
-        WriteBaseFileTXT writeBaseFileTXT = new WriteBaseFileTXT();
+        //Запись "elements" в базу.
+        BaseExcel baseExcel = new BaseExcel();
         try {
-            writeBaseFileTXT.WriteFileBase(elements);
+            baseExcel.changePrice();
         } catch (IOException e) {
+            JOptionPane.showMessageDialog(new JFrame(), "Закройте Excel файл с базой ",
+                    "Файл открыт!",
+                    JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }

@@ -23,7 +23,6 @@ public class Element {
     private double price = 0;
     private BufferedImage imageBuff = null;
     private int count = 0;
-    private boolean choice = false;
 
     public Element()  {
         try {
@@ -96,11 +95,4 @@ public class Element {
         this.code = code;
     }
 
-    public boolean isChoice() {
-        return choice;
-    }
-
-    public void setChoice(boolean choice) {
-        this.choice = choice;
-    }
 }

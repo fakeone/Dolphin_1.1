@@ -69,12 +69,8 @@ public class MainWindow extends JFrame {
         // Загружаем базу из файла.
             BaseExcel baseExcel = new BaseExcel();
             baseExcel.readBaseExcel();
-
-//            final ReadBaseFileTXT readBase = new ReadBaseFileTXT();
-//            readBase.readFileBase();
         // Создаем первую таблицу с базой.
-//            final MyFirstTableModel myFirstTableModel = new MyFirstTableModel(readBase.getFullBase().getBaseList());
-            final MyFirstTableModel myFirstTableModel = new MyFirstTableModel(baseExcel.getBase().getBaseList());
+            final MyFirstTableModel myFirstTableModel = new MyFirstTableModel(baseExcel.getBaseList());
             final JTable baseTable = new JTable(myFirstTableModel);
         // Сортировка по названию.
             final TableRowSorter<MyFirstTableModel> sorter = new TableRowSorter<MyFirstTableModel>(myFirstTableModel);
@@ -105,7 +101,6 @@ public class MainWindow extends JFrame {
             baseTable.getSelectionModel().addListSelectionListener(
                 new ListSelectionListener() {
                     public void valueChanged(ListSelectionEvent event) {
-
                         ArrayList<Element> chouseElem = new ArrayList<Element>();
                         // Выбираем элементы в таблице, количество которых не равно нулю.
                         while (myFirstTableModel.getElements().size() > count) {

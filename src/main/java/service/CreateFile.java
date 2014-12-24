@@ -32,8 +32,6 @@ public class CreateFile {
                             "Площадка состоит из " + playground.getElemNumber() + " элементов: " + "\n" + "\n" +
                             playground.getInfo()
             );
-
-            //JOptionPane.showMessageDialog(new JFrame(), "Файл создан и сохранен в корневом диске!");
             // Открываем сохраненный файл.
             Runtime.getRuntime().exec("cmd /C " + "/DolphinBase/Playground.txt");
 
@@ -61,8 +59,6 @@ public class CreateFile {
                             "Площадка состоит из " + playground.getElemNumber() + " элементов: " + "\n" + "\n" +
                             playground.getInfo()
             );
-
-            //JOptionPane.showMessageDialog(new JFrame(), "Файл создан!");
             // Открываем сохраненный файл.
             Runtime.getRuntime().exec("cmd /C " + "/DolphinBase/Playground.doc");
 
@@ -99,11 +95,10 @@ public class CreateFile {
                         playground.getpGroundList().get(count).getPrice() * playground.getpGroundList().get(count).getCount() +
                         " грн." + "\n"
                         , new com.itextpdf.text.Font(times, 14)));
-                document.add(com.itextpdf.text.Image.getInstance("/DolphinBase/" + playground.getpGroundList().get(count).getName() + ".jpg"));
+                document.add(com.itextpdf.text.Image.getInstance("/DolphinBase//1dolphin.png"));
                 count++;
             }
             count = 0;
-            //JOptionPane.showMessageDialog(new JFrame(), "Файл создан и сохранен в корневом диске!");
             // Открываем сохраненный файл.
             Runtime.getRuntime().exec("cmd /C " + "/DolphinBase/Playground.pdf");
 
@@ -111,6 +106,7 @@ public class CreateFile {
             JOptionPane.showMessageDialog(new JFrame(), "Файл Playground.pdf невозможно создать, проверьте наличие доступа к корневому диску.",
                     "Невозможно создать файл!",
                     JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
