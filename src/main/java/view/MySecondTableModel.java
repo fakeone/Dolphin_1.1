@@ -62,5 +62,9 @@ public class MySecondTableModel extends MyFirstTableModel {
         return "";
     }
 
+    public void removeRow(int selectedRow) {
+        elements.remove(selectedRow);
+    }
+
 }
 

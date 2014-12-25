@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MyFirstTableModel implements TableModel {
+public class MyFirstTableModel implements TableModel  {
 
     private static final int IMAGE_COLUMN = 0;
     private static final int NAME_COLUMN = 1;
@@ -113,8 +113,7 @@ public class MyFirstTableModel implements TableModel {
                 element.setName((String)value);
                 break;
             case PRICE_COLUMN:
-                int response;
-                response = JOptionPane.showConfirmDialog(null, "Подтвердите изменение цены элемента!");
+                int response = JOptionPane.showConfirmDialog(null, "Подтвердите изменение цены элемента!");
                 if (response == 0) {
                     element.setPrice((Double)value);
                 }

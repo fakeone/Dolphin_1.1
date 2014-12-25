@@ -7,8 +7,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -52,6 +51,8 @@ public class MainWindow extends JFrame {
     private static JLabel fullPrise = new JLabel();
     private static final Font font = new Font("Verdana", Font.PLAIN, 11);
     private static final Font font2 = new Font("Verdana", Font.PLAIN, 18);
+    private static MySecondTableModel secondTable = new MySecondTableModel();
+    private static JTable playGroundTable = new JTable();
 
     public static void createGUI() throws IOException {
 
@@ -81,8 +82,6 @@ public class MainWindow extends JFrame {
         // Поиск элементов в таблице с базой.
             panel.add(JTFFilter, BorderLayout.SOUTH);
             JTFFilter.getDocument().addDocumentListener(new Search(JTFFilter, sorter));
-        // Меняем шрифт.
-
         // Создаем меню.
             JMenuBar menuBar = new JMenuBar(); // Создаем бар меню.
             JMenu menu = new JMenu("Меню"); // Создаем элемент меню.
@@ -92,10 +91,6 @@ public class MainWindow extends JFrame {
             addElement.setFont(font);
             menu.add(addElement);
             // addElement.addMenuKeyListener();
-
-            JMenuItem delElement = new JMenuItem("Удалить элемент из базы");
-            delElement.setFont(font);
-            menu.add(delElement);
 
         // Обновление таблицы площадки при любом клике мышкой.
             baseTable.getSelectionModel().addListSelectionListener(
@@ -113,8 +108,48 @@ public class MainWindow extends JFrame {
                         // Добавляем элементы с количеством больше нуля в площадку.
                         playground.setpGroundList(chouseElem);
                         // Создаем вторую таблицу для площадки и выводим на экран.
-                        MySecondTableModel secondTable = new MySecondTableModel(playground.getpGroundList());
-                        JTable playGroundTable = new JTable(secondTable);
+                        secondTable = new MySecondTableModel(playground.getpGroundList());
+                        playGroundTable = new JTable(secondTable);
+
+                        playGroundTable.addFocusListener(new FocusListener() {
+                            @Override
+                            public void focusGained(FocusEvent e) {
+                                if (playGroundTable.getSelectedRow() != -1) {
+                                    String a = (String) secondTable.getValueAt(playGroundTable.getSelectedRow(), 2);
+
+                                    for (int i = 0; i <= myFirstTableModel.getElements().size(); i++) {
+                                        if (a == baseTable.getValueAt(i, 2)) {
+                                            baseTable.setValueAt(0, i, 4);
+                                            secondTable.removeRow(playGroundTable.getSelectedRow());
+                                        }
+                                    }
+
+                                    TableRowSorter<MySecondTableModel> sorter2 = new TableRowSorter<MySecondTableModel>(secondTable);
+                                    playGroundTable.setRowSorter(sorter2);
+                                    playGroundTable.setRowHeight(80);
+                                    panel.remove(sPane2);
+                                    sPane2 = new JScrollPane(playGroundTable);
+                                    panel.remove(fullPrise);
+                                    fullPrise = new JLabel("Общая цена площадки: " + Double.toString(playground.getPlayGroundPrise()) + "грн.", JLabel.CENTER);
+                                    fullPrise.setFont(font2);
+                                    panel.add(fullPrise, BorderLayout.NORTH);
+                                    sPane.updateUI();
+                                    panel.add(sPane2, BorderLayout.EAST);
+                                    panel.updateUI();
+
+                                }
+                            }
+
+                            @Override
+                            public void focusLost(FocusEvent e) {
+                                if (playGroundTable.getSelectedRow() != -1) {
+                                    sPane.updateUI();
+                                    panel.updateUI();
+                                }
+
+                            }
+                        });
+
                         TableRowSorter<MySecondTableModel> sorter2 = new TableRowSorter<MySecondTableModel>(secondTable);
                         playGroundTable.setRowSorter(sorter2);
                         playGroundTable.setRowHeight(80);
@@ -129,7 +164,6 @@ public class MainWindow extends JFrame {
                         panel.updateUI();
                     }
                 });
-
             menu.addSeparator();
 
             JMenuItem exitItem = new JMenuItem("Exit");
