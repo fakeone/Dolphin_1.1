@@ -1,9 +1,10 @@
 package service;
 
+import view.MainWindow;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -20,13 +21,14 @@ public class Element {
 
     private String name = "Без имени";
     private String code = "Код";
+    private String size = "Размер";
     private double price = 0;
     private BufferedImage imageBuff = null;
     private int count = 0;
 
     public Element()  {
         try {
-        imageBuff = ImageIO.read(new File("/DolphinBase/1dolphin.png"));
+        imageBuff = ImageIO.read(new File(MainWindow.dolphinImage));
         } catch (Exception e) {
             JOptionPane.showMessageDialog(new JFrame(), "Отсутствует файл с дельфинчиком C://DolphinBase/1dolphin.png" ,
                     "Отсутствует изображение!",
@@ -67,11 +69,10 @@ public class Element {
         return imageBuff;
     }
 
-    public void setImage(byte[] data) {
+    public void setImage(String imageURL) {
 
         try {
-//            imageBuff = ImageIO.read(new File(imageURL));
-            imageBuff = ImageIO.read(new ByteArrayInputStream(data));
+            imageBuff = ImageIO.read(new File(imageURL));
         } catch (IOException e) {
             JOptionPane.showMessageDialog(new JFrame(), "Отсутствует изображение для " + name,
                     "Отсутствует изображение!",
@@ -95,4 +96,11 @@ public class Element {
         this.code = code;
     }
 
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
 }

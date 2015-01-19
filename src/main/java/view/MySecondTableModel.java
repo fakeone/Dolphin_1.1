@@ -3,20 +3,10 @@ package view;
 import service.Element;
 
 import javax.swing.*;
-import javax.swing.event.TableModelListener;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class MySecondTableModel extends MyFirstTableModel {
 
-    private static final int IMAGE_COLUMN = 0;
-    private static final int NAME_COLUMN = 1;
-    private static final int CODE_COLUMN = 2;
-    private static final int PRICE_COLUMN = 3;
-    private static final int COUNT_COLUMN = 4;
-
-    private Set<TableModelListener> listeners = new HashSet<TableModelListener>();
     private List<Element> elements; // Ёлементы готовой площадки.
 
     public MySecondTableModel() {
@@ -40,7 +30,7 @@ public class MySecondTableModel extends MyFirstTableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         Element element = elements.get(rowIndex);
         switch (columnIndex) {
-            case IMAGE_COLUMN:
+            case MyFirstTableModel.IMAGE_COLUMN:
                 try {
                     return new ImageIcon(element.getImage());
                 } catch (Exception e) {
@@ -50,16 +40,23 @@ public class MySecondTableModel extends MyFirstTableModel {
                             JOptionPane.ERROR_MESSAGE);
                     System.exit(0);
                 }
-            case NAME_COLUMN:
+            case MyFirstTableModel.NAME_COLUMN:
                 return element.getName();
-            case CODE_COLUMN:
+            case MyFirstTableModel.SIZE_COLUMN:
+                return element.getSize();
+            case MyFirstTableModel.CODE_COLUMN:
                 return element.getCode();
-            case PRICE_COLUMN:
+            case MyFirstTableModel.PRICE_COLUMN:
                 return element.getPrice();
-            case COUNT_COLUMN:
+            case MyFirstTableModel.COUNT_COLUMN:
                 return element.getCount();
         }
         return "";
+    }
+
+    @Override
+    public void setValueAt(Object value, int rowIndex, int columnIndex) {
+
     }
 
     public void removeRow(int selectedRow) {

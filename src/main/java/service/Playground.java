@@ -13,23 +13,12 @@ public class Playground {
 
     private double playGroundPrise = 0;
     private int elemNumber = 0;
-    private double workPrice = 0;
-    private double fullPrice = playGroundPrise + workPrice;
+    private int workPricePercent = 15;
+    private double priceDelivery = 0;
+    private double discount = 0;
+    private double fullPrice = 0;
     private String clientName = "Клиент";
     private String position = "Место установки";
-    private String info = "";
-
-    public String getInfo() {
-        info = "";
-        while(pGroundList.size() > counter) {
-            info = info + pGroundList.get(counter).getName() + " (" + pGroundList.get(counter).getCode() +  "): " +
-                    pGroundList.get(counter).getPrice()+ "грн. * " + pGroundList.get(counter).getCount() + "шт. = ";
-            info = info + pGroundList.get(counter).getPrice() * pGroundList.get(counter).getCount() + " грн." + "\n";
-            counter++;
-        }
-        counter = 0;
-        return info;
-    }
 
     public List<Element> getpGroundList() {
         return pGroundList;
@@ -67,15 +56,25 @@ public class Playground {
         this.elemNumber = elemNumber;
     }
 
-    public double getWorkPrice() {
-        return workPrice;
+    public double getWorkPricePercent() {
+        return workPricePercent;
     }
 
-    public void setWorkPrice(double workPrice) {
-        this.workPrice = workPrice;
+    public void setWorkPricePercent(int workPricePercent) {
+        this.workPricePercent = workPricePercent;
     }
 
     public double getFullPrice() {
+        if (discount != 0 && workPricePercent != 0) {
+            fullPrice = playGroundPrise + priceDelivery -
+                    (playGroundPrise * discount/100) + (playGroundPrise * workPricePercent /100);
+        } else if (discount == 0 &&  workPricePercent != 0) {
+            fullPrice = playGroundPrise + priceDelivery + (playGroundPrise * workPricePercent /100);
+        }  else if (discount != 0 &&  workPricePercent == 0) {
+            fullPrice = playGroundPrise + priceDelivery - (playGroundPrise * discount/100);
+        } else {
+            fullPrice = playGroundPrise + priceDelivery;
+        }
         return fullPrice;
     }
 
@@ -97,5 +96,21 @@ public class Playground {
 
     public void setPosition(String position) {
         this.position = position;
+    }
+
+    public double getPriceDelivery() {
+        return priceDelivery;
+    }
+
+    public void setPriceDelivery(double priceDelivery) {
+        this.priceDelivery = priceDelivery;
+    }
+
+    public double getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(double discount) {
+        this.discount = discount;
     }
 }

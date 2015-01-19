@@ -10,7 +10,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Дмитрий on 23.12.14.
@@ -18,7 +17,7 @@ import java.util.List;
 public class BaseExcel {
 
     private String baseLink = "/DolphinBase/Price.xls";
-    private ArrayList<Element> baseList = new ArrayList(); // Список элементов
+    private static ArrayList<Element> baseList = new ArrayList(); // Список элементов
     private static POIFSFileSystem fs;
     private static HSSFWorkbook wb;
     private static HSSFSheet sheet;
@@ -26,6 +25,11 @@ public class BaseExcel {
     private static HSSFCell cell;
     private static Element elem;
     private static int rows;
+    private final static int nameColumn = 1;
+    private final static int sizeColumn = 2;
+    private final static int codeColumn = 4;
+    private final static int priceColumn = 5;
+
 
     public void readBaseExcel () throws IOException {
         fs = new POIFSFileSystem(new FileInputStream(baseLink));
@@ -41,19 +45,24 @@ public class BaseExcel {
                 cell = row.getCell(0);
                 if(cell != null){
                     elem = new Element();
-                    cell = row.getCell(1); //берем 2-ю ячейку
+                    cell = row.getCell(nameColumn); //берем 2-ю ячейку
                     if(cell != null) {
-                        elem.setName(cell.getStringCellValue()); // Записываем назване элемента.
+                        elem.setName(cell.getStringCellValue()); // Записываем название элемента.
                     }
-                    cell = row.getCell(4); //берем 5-ю ячейку
+                    cell = row.getCell(sizeColumn); //берем 3-ю ячейку
+                    if(cell != null) {
+                        elem.setSize(cell.getStringCellValue()); // Записываем название элемента.
+                    }
+                    cell = row.getCell(codeColumn); //берем 5-ю ячейку
                     if(cell != null) {
                         elem.setCode(cell.getStringCellValue()); // Записываем код элемента.
                     }
-                    cell = row.getCell(5); //берем 6-ю ячейку
+                    cell = row.getCell(priceColumn); //берем 6-ю ячейку
                     if(cell != null) {
                         elem.setPrice(cell.getNumericCellValue()); // Записываем цену элемента.
                     }
                     if(elem.getPrice() != 0.0){
+                        elem.setImage("/DolphinBase/images/" + elem.getCode() + ".png");
                         baseList.add(elem);
                     }
                 }
@@ -66,13 +75,16 @@ public class BaseExcel {
         for(int r = 15; r < rows; r++) {
             row = sheet.getRow(r); //берем строку
             if((row != null) ) {
-                cell = row.getCell(4); //берем 5-ю ячейку
+                cell = row.getCell(codeColumn); //берем 5-ю ячейку
+                //System.out.println("Код элемента - " + cell.getStringCellValue() +" = " + baseList.get(0).getCode());
                 if(cell != null) {
-                    for(int i = 0; i < baseList.size(); i++)
-                    if(cell.getStringCellValue() == baseList.get(i).getCode()) {
-                        HSSFCell cellPrice = row.getCell(5); //берем 6-ю ячейку
-                        if(cellPrice != null) {
-                            cellPrice.setCellValue(baseList.get(i).getPrice()); //задаем значение ячейки
+                    for(int i = 0; i < baseList.size(); i++){
+                        if(cell.getStringCellValue() == baseList.get(i).getCode()) {
+                            HSSFCell cellPrice = row.getCell(priceColumn); //берем 6-ю ячейку
+                            //System.out.println("5я строка - " + cellPrice.getStringCellValue());
+                            if(cellPrice != null) {
+                                cellPrice.setCellValue(baseList.get(i).getPrice()); //задаем значение ячейки
+                            }
                         }
                     }
                 }
@@ -84,15 +96,16 @@ public class BaseExcel {
         fileOut.close();
     }
 
-    public void addElement(List<Element> elements) throws IOException {
-
-        //sheet.shiftRows(sheet.getPhysicalNumberOfRows(), sheet.getLastRowNum(), 1); // r - строка, cell - ячейка
-        sheet.createRow(sheet.getPhysicalNumberOfRows()-12).createCell(1).setCellValue(elements.get(elements.size()-1).getName());
-        //cell.setCellValue("Modified " + r); //задаем значение ячейки
-
-    }
-
     public ArrayList<Element> getBaseList() {
         return baseList;
     }
+//    public void addElement(List<Element> elements) throws IOException {
+//
+//        //sheet.shiftRows(sheet.getPhysicalNumberOfRows(), sheet.getLastRowNum(), 1); // r - строка, cell - ячейка
+//        sheet.createRow(sheet.getPhysicalNumberOfRows()-12).createCell(1).setCellValue(elements.get(elements.size()-1).getName());
+//        //cell.setCellValue("Modified " + r); //задаем значение ячейки
+//
+//    }
+
+
 }

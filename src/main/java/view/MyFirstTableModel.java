@@ -13,12 +13,13 @@ import java.util.Set;
 
 public class MyFirstTableModel implements TableModel  {
 
-    private static final int IMAGE_COLUMN = 0;
-    private static final int NAME_COLUMN = 1;
-    private static final int CODE_COLUMN = 2;
-    private static final int PRICE_COLUMN = 3;
-    private static final int COUNT_COLUMN = 4;
-
+    public static final int IMAGE_COLUMN = 0;
+    public static final int NAME_COLUMN = 1;
+    public static final int SIZE_COLUMN = 2;
+    public static final int CODE_COLUMN = 3;
+    public static final int PRICE_COLUMN = 4;
+    public static final int COUNT_COLUMN = 5;
+    private BaseExcel baseExcel = new BaseExcel();
     private Set<TableModelListener> listeners = new HashSet<TableModelListener>();
     private List<Element> elements;
 
@@ -38,6 +39,8 @@ public class MyFirstTableModel implements TableModel  {
                 return ImageIcon.class;
             case NAME_COLUMN:
                 return String.class;
+            case SIZE_COLUMN:
+                return String.class;
             case CODE_COLUMN:
                 return String.class;
             case PRICE_COLUMN:
@@ -50,7 +53,7 @@ public class MyFirstTableModel implements TableModel  {
     }
     @Override
     public int getColumnCount() {
-        return 5;
+        return 6;
     }
     @Override
     public String getColumnName(int columnIndex) {
@@ -59,10 +62,12 @@ public class MyFirstTableModel implements TableModel  {
                 return "Изображение";
             case NAME_COLUMN:
                 return "Название";
+            case SIZE_COLUMN:
+                return "Размеры(мм)";
             case CODE_COLUMN:
                 return "Код";
             case PRICE_COLUMN:
-                return "Цена";
+                return "Цена(грн.)";
             case COUNT_COLUMN:
                 return "Количество";
         }
@@ -88,6 +93,8 @@ public class MyFirstTableModel implements TableModel  {
             }
             case NAME_COLUMN:
                 return element.getName();
+            case SIZE_COLUMN:
+                return element.getSize();
             case CODE_COLUMN:
                 return element.getCode();
             case PRICE_COLUMN:
@@ -116,6 +123,14 @@ public class MyFirstTableModel implements TableModel  {
                 int response = JOptionPane.showConfirmDialog(null, "Подтвердите изменение цены элемента!");
                 if (response == 0) {
                     element.setPrice((Double)value);
+                    try {
+                        baseExcel.changePrice();
+                    } catch (IOException e) {
+                        JOptionPane.showMessageDialog(new JFrame(), "Закройте Excel файл с базой ",
+                                "Файл открыт!",
+                                JOptionPane.ERROR_MESSAGE);
+                        e.printStackTrace();
+                    }
                 }
                 break;
             case COUNT_COLUMN:
@@ -123,15 +138,7 @@ public class MyFirstTableModel implements TableModel  {
                 break;
         }
         //Запись "elements" в базу.
-        BaseExcel baseExcel = new BaseExcel();
-        try {
-            baseExcel.changePrice();
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(new JFrame(), "Закройте Excel файл с базой ",
-                    "Файл открыт!",
-                    JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
+
     }
 
     public List<Element> getElements() {
