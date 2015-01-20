@@ -1,5 +1,7 @@
 package service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 /**
@@ -75,6 +77,8 @@ public class Playground {
         } else {
             fullPrice = playGroundPrise + priceDelivery;
         }
+        BigDecimal bd = new BigDecimal(fullPrice).setScale(2, RoundingMode.HALF_EVEN);
+        fullPrice = bd.doubleValue();
         return fullPrice;
     }
 
