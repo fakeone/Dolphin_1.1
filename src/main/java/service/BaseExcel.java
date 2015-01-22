@@ -31,8 +31,8 @@ public class BaseExcel {
     private final static int priceColumn = 5;
 
 
-    public void readBaseExcel () throws IOException {
-        fs = new POIFSFileSystem(new FileInputStream(baseLink));
+    public void readBaseExcel (String linkExcel) throws IOException {
+        fs = new POIFSFileSystem(new FileInputStream(linkExcel));
         wb = new HSSFWorkbook(fs);
         sheet = wb.getSheetAt(0);
         row = null;

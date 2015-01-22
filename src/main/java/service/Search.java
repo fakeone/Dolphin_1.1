@@ -47,4 +47,4 @@ public class Search implements DocumentListener {
             public void changedUpdate(DocumentEvent e) {
                 throw new UnsupportedOperationException("Не поддерживается.");
             }
-}
+    }

@@ -74,7 +74,8 @@ public class MainWindow extends JFrame {
             panel.setLayout(layout);
         // Загружаем базу из файла.
             BaseExcel baseExcel = new BaseExcel();
-            baseExcel.readBaseExcel();
+            baseExcel.readBaseExcel("/DolphinBase/Price.xls");
+            baseExcel.readBaseExcel("/DolphinBase/MODPrice.xls");
         // Создаем первую таблицу с базой.
             final MyFirstTableModel myFirstTableModel = new MyFirstTableModel(baseExcel.getBaseList());
             final JTable baseTable = new JTable(myFirstTableModel);
@@ -154,21 +155,22 @@ public class MainWindow extends JFrame {
                         playGroundTable.addFocusListener(new FocusListener() {
                             @Override
                             public void focusGained(FocusEvent e) {
+                                JTFFilter.setText("");
                                 if (playGroundTable.getSelectedRow() != -1) {
                                     int response = JOptionPane.showConfirmDialog(null, "Вы действительно хотите убрать элемент из площадки?");
                                     if (response == 0) {
-                                    String a = (String) secondTable.getValueAt(playGroundTable.getSelectedRow(), MyFirstTableModel.CODE_COLUMN);
+                                        String a = (String) secondTable.getValueAt(playGroundTable.getSelectedRow(), MyFirstTableModel.CODE_COLUMN);
 
-                                    for (int i = 0; i <= myFirstTableModel.getElements().size()-1; i++) {
-                                        if (a == baseTable.getValueAt(i, MyFirstTableModel.CODE_COLUMN)) {
-                                            baseTable.setValueAt(0, i, MyFirstTableModel.COUNT_COLUMN);
-                                            secondTable.removeRow(playGroundTable.getSelectedRow());
+                                        for (int i = 0; i <= myFirstTableModel.getElements().size()-1; i++) {
+                                            if (a == baseTable.getValueAt(i, MyFirstTableModel.CODE_COLUMN)) {
+                                                baseTable.setValueAt(0, i, MyFirstTableModel.COUNT_COLUMN);
+                                                secondTable.removeRow(playGroundTable.getSelectedRow());
+                                            }
                                         }
-                                    }
 
-                                    TableRowSorter<MySecondTableModel> sorter2 = new TableRowSorter<MySecondTableModel>(secondTable);
-                                    playGroundTable.setRowSorter(sorter2);
-                                    playGroundTable.setRowHeight(80);
+//                                    TableRowSorter<MySecondTableModel> sorter2 = new TableRowSorter<MySecondTableModel>(secondTable);
+//                                    playGroundTable.setRowSorter(sorter2);
+//                                    playGroundTable.setRowHeight(80);
                                     panel.remove(sPane2);
                                     sPane2 = new JScrollPane(playGroundTable);
                                     panel.remove(fullPrise);

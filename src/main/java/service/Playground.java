@@ -16,8 +16,10 @@ public class Playground {
     private double playGroundPrise = 0;
     private int elemNumber = 0;
     private int workPricePercent = 15;
+    private double workPrice = 0;
     private double priceDelivery = 0;
     private double discount = 0;
+    private double discountPrice = 0;
     private double fullPrice = 0;
     private String clientName = "Клиент";
     private String position = "Место установки";
@@ -77,7 +79,7 @@ public class Playground {
         } else {
             fullPrice = playGroundPrise + priceDelivery;
         }
-        BigDecimal bd = new BigDecimal(fullPrice).setScale(2, RoundingMode.HALF_EVEN);
+        BigDecimal bd = new BigDecimal(fullPrice).setScale(0, RoundingMode.HALF_EVEN);
         fullPrice = bd.doubleValue();
         return fullPrice;
     }
@@ -111,10 +113,33 @@ public class Playground {
     }
 
     public double getDiscount() {
+
         return discount;
     }
 
     public void setDiscount(double discount) {
         this.discount = discount;
+    }
+
+    public double getWorkPrice() {
+        workPrice = playGroundPrise*workPricePercent/100;
+        BigDecimal bd = new BigDecimal(workPrice).setScale(0, RoundingMode.HALF_EVEN);
+        workPrice = bd.doubleValue();
+        return workPrice;
+    }
+
+    public void setWorkPrice(double workPrice) {
+        this.workPrice = workPrice;
+    }
+
+    public double getDiscountPrice() {
+        discountPrice = playGroundPrise*discount/100;
+        BigDecimal bd = new BigDecimal(discountPrice).setScale(0, RoundingMode.HALF_EVEN);
+        discountPrice = bd.doubleValue();
+        return discountPrice;
+    }
+
+    public void setDiscountPrice(double discountPrice) {
+        this.discountPrice = discountPrice;
     }
 }

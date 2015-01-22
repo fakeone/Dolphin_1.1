@@ -81,7 +81,7 @@ public class CreateFile {
 
             String inform[] = {"Оборудование (грн.):",
                     "Монтажные работы \"Dolphin\" ("+ playground.getWorkPricePercent()+ "%" + ") (грн):",
-                    "Скидка (%):",
+                    "Скидка (" + playground.getDiscount() +"%):",
                     "Доставка (грн.):",
                     "Всего (грн.):"
 
@@ -89,8 +89,8 @@ public class CreateFile {
 
             Object priceInfo[] = {
                     playground.getPlayGroundPrise(),
-                    playground.getWorkPricePercent()*playground.getPlayGroundPrise()/100,
-                    playground.getDiscount(),
+                    playground.getWorkPrice(),
+                    playground.getDiscountPrice(),
                     playground.getPriceDelivery(),
                     playground.getFullPrice()
             };

@@ -7,6 +7,8 @@ import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * Created by ִלטענטי on 27.07.14.
@@ -58,6 +60,8 @@ public class Element {
     }
 
     public double getPrice() {
+        BigDecimal bd = new BigDecimal(price).setScale(2, RoundingMode.HALF_EVEN);
+        price = bd.doubleValue();
         return price;
     }
 
