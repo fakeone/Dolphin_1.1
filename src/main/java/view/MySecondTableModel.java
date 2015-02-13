@@ -1,19 +1,19 @@
 package view;
 
-import service.Element;
+import model.Element;
 
 import javax.swing.*;
-import java.util.List;
+import java.util.*;
 
 public class MySecondTableModel extends MyFirstTableModel {
 
-    private List<Element> elements; // Элементы готовой площадки.
+    private List<Element> elements = new ArrayList<>(); // Р­Р»РµРјРµРЅС‚С‹ РіРѕС‚РѕРІРѕР№ РїР»РѕС‰Р°РґРєРё.
 
     public MySecondTableModel() {
     }
 
-    public MySecondTableModel(List<Element> elements) {
-        this.elements = elements;
+    public MySecondTableModel(Collection<Element> elements) {
+        this.elements.addAll(new HashSet<Element>(elements));
     }
 
     @Override
@@ -34,9 +34,9 @@ public class MySecondTableModel extends MyFirstTableModel {
                 try {
                     return new ImageIcon(element.getImage());
                 } catch (Exception e) {
-                    JOptionPane.showMessageDialog(new JFrame(), "Отсутствует изображение для " + element.getName() + ".\n"+
-                            "Программа будет закрыта, добавьте изображение и перезапустите программу.",
-                            "Отсутствует изображение!",
+                    JOptionPane.showMessageDialog(new JFrame(), "РћС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РґР»СЏ " + element.getName() + ".\n"+
+                                    "РџСЂРѕРіСЂР°РјРјР° Р±СѓРґРµС‚ Р·Р°РєСЂС‹С‚Р°, РґРѕР±Р°РІСЊС‚Рµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ Рё РїРµСЂРµР·Р°РїСѓСЃС‚РёС‚Рµ РїСЂРѕРіСЂР°РјРјСѓ.",
+                            "РћС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РёР·РѕР±СЂР°Р¶РµРЅРёРµ!",
                             JOptionPane.ERROR_MESSAGE);
                     System.exit(0);
                 }
@@ -64,4 +64,3 @@ public class MySecondTableModel extends MyFirstTableModel {
     }
 
 }
-

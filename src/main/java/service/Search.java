@@ -8,7 +8,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.TableRowSorter;
 
 /**
- * Created by Дмитрий on 19.12.14.
+ * Created by Р”РјРёС‚СЂРёР№ on 19.12.14.
  */
 public class Search implements DocumentListener {
 
@@ -45,6 +45,6 @@ public class Search implements DocumentListener {
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                throw new UnsupportedOperationException("Не поддерживается.");
+                throw new UnsupportedOperationException("РќРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚СЃСЏ.");
             }
     }

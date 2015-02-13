@@ -8,7 +8,7 @@ public class Main {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    MainWindow.createGUI(); // Запускаем программу.
+                    MainWindow.createGUI(); // Р—Р°РїСѓСЃРєР°РµРј РїСЂРѕРіСЂР°РјРјСѓ.
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

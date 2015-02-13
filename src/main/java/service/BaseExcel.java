@@ -1,23 +1,25 @@
 package service;
 
+import model.Element;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import util.FileUtil;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Created by Дмитрий on 23.12.14.
+ * Created by Р”РјРёС‚СЂРёР№ on 23.12.14.
  */
 public class BaseExcel {
 
-    private String baseLink = "/DolphinBase/Price.xls";
-    private static ArrayList<Element> baseList = new ArrayList(); // Список элементов
+    private static List<Element> baseList = new ArrayList(); // РЎРїРёСЃРѕРє СЌР»РµРјРµРЅС‚РѕРІ
     private static POIFSFileSystem fs;
     private static HSSFWorkbook wb;
     private static HSSFSheet sheet;
@@ -31,38 +33,39 @@ public class BaseExcel {
     private final static int priceColumn = 5;
 
 
-    public void readBaseExcel (String linkExcel) throws IOException {
+    public void readBaseExcel(String linkExcel) throws IOException {
         fs = new POIFSFileSystem(new FileInputStream(linkExcel));
         wb = new HSSFWorkbook(fs);
         sheet = wb.getSheetAt(0);
         row = null;
         cell = null;
-        rows = sheet.getPhysicalNumberOfRows(); //получаем актуальное число строк
+        rows = sheet.getPhysicalNumberOfRows(); //РїРѕР»СѓС‡Р°РµРј Р°РєС‚СѓР°Р»СЊРЅРѕРµ С‡РёСЃР»Рѕ СЃС‚СЂРѕРє
 
         for(int r = 15; r < rows; r++) {
-            row = sheet.getRow(r); //берем строку
+            row = sheet.getRow(r); //Р±РµСЂРµРј СЃС‚СЂРѕРєСѓ
             if((row != null) ) {
                 cell = row.getCell(0);
                 if(cell != null){
                     elem = new Element();
-                    cell = row.getCell(nameColumn); //берем 2-ю ячейку
+                    cell = row.getCell(nameColumn); //Р±РµСЂРµРј 2-СЋ СЏС‡РµР№РєСѓ
                     if(cell != null) {
-                        elem.setName(cell.getStringCellValue()); // Записываем название элемента.
+                        elem.setName(cell.getStringCellValue()); // Р—Р°РїРёСЃС‹РІР°РµРј РЅР°Р·РІР°РЅРёРµ СЌР»РµРјРµРЅС‚Р°.
                     }
-                    cell = row.getCell(sizeColumn); //берем 3-ю ячейку
+                    cell = row.getCell(sizeColumn); //Р±РµСЂРµРј 3-СЋ СЏС‡РµР№РєСѓ
                     if(cell != null) {
-                        elem.setSize(cell.getStringCellValue()); // Записываем название элемента.
+                        elem.setSize(cell.getStringCellValue()); // Р—Р°РїРёСЃС‹РІР°РµРј РЅР°Р·РІР°РЅРёРµ СЌР»РµРјРµРЅС‚Р°.
                     }
-                    cell = row.getCell(codeColumn); //берем 5-ю ячейку
+                    cell = row.getCell(codeColumn); //Р±РµСЂРµРј 5-СЋ СЏС‡РµР№РєСѓ
                     if(cell != null) {
-                        elem.setCode(cell.getStringCellValue()); // Записываем код элемента.
+                        elem.setCode(cell.getStringCellValue()); // Р—Р°РїРёСЃС‹РІР°РµРј РєРѕРґ СЌР»РµРјРµРЅС‚Р°.
                     }
-                    cell = row.getCell(priceColumn); //берем 6-ю ячейку
+                    cell = row.getCell(priceColumn); //Р±РµСЂРµРј 6-СЋ СЏС‡РµР№РєСѓ
                     if(cell != null) {
-                        elem.setPrice(cell.getNumericCellValue()); // Записываем цену элемента.
+                        elem.setPrice(cell.getNumericCellValue()); // Р—Р°РїРёСЃС‹РІР°РµРј С†РµРЅСѓ СЌР»РµРјРµРЅС‚Р°.
                     }
                     if(elem.getPrice() != 0.0){
-                        elem.setImage("/DolphinBase/images/" + elem.getCode() + ".png");
+                        //TODO current dir + "/images/"
+                        elem.setImage(FileUtil.getRootFolder() + "/images/" + elem.getCode() + ".png");
                         baseList.add(elem);
                     }
                 }
@@ -70,20 +73,20 @@ public class BaseExcel {
         }
     }
 
-    public void changePrice() throws IOException {
+    public void changePrice(String excelFile) throws IOException {
 
         for(int r = 15; r < rows; r++) {
-            row = sheet.getRow(r); //берем строку
+            row = sheet.getRow(r); //Р±РµСЂРµРј СЃС‚СЂРѕРєСѓ
             if((row != null) ) {
-                cell = row.getCell(codeColumn); //берем 5-ю ячейку
-                //System.out.println("Код элемента - " + cell.getStringCellValue() +" = " + baseList.get(0).getCode());
+                cell = row.getCell(codeColumn); //Р±РµСЂРµРј 5-СЋ СЏС‡РµР№РєСѓ
+                //System.out.println("РљРѕРґ СЌР»РµРјРµРЅС‚Р° - " + cell.getStringCellValue() +" = " + baseList.get(0).getCode());
                 if(cell != null) {
                     for(int i = 0; i < baseList.size(); i++){
                         if(cell.getStringCellValue() == baseList.get(i).getCode()) {
-                            HSSFCell cellPrice = row.getCell(priceColumn); //берем 6-ю ячейку
-                            //System.out.println("5я строка - " + cellPrice.getStringCellValue());
+                            HSSFCell cellPrice = row.getCell(priceColumn); //Р±РµСЂРµРј 6-СЋ СЏС‡РµР№РєСѓ
+                            //System.out.println("5СЏ СЃС‚СЂРѕРєР° - " + cellPrice.getStringCellValue());
                             if(cellPrice != null) {
-                                cellPrice.setCellValue(baseList.get(i).getPrice()); //задаем значение ячейки
+                                cellPrice.setCellValue(baseList.get(i).getPrice()); //Р·Р°РґР°РµРј Р·РЅР°С‡РµРЅРёРµ СЏС‡РµР№РєРё
                             }
                         }
                     }
@@ -91,19 +94,29 @@ public class BaseExcel {
             }
         }
 
-        FileOutputStream fileOut = new FileOutputStream(baseLink);
+        FileOutputStream fileOut = new FileOutputStream(excelFile);
         wb.write(fileOut);
         fileOut.close();
     }
 
-    public ArrayList<Element> getBaseList() {
+    public Element getElementByShortCode(String shortCode) {
+//        //TODO try lambda
+        for (Element element : baseList) {
+            if (shortCode.equals(element.getShortCode())) {
+                return element;
+            }
+        }
+        return null;
+    }
+
+    public List<Element> getBaseList() {
         return baseList;
     }
 //    public void addElement(List<Element> elements) throws IOException {
 //
-//        //sheet.shiftRows(sheet.getPhysicalNumberOfRows(), sheet.getLastRowNum(), 1); // r - строка, cell - ячейка
+//        //sheet.shiftRows(sheet.getPhysicalNumberOfRows(), sheet.getLastRowNum(), 1); // r - СЃС‚СЂРѕРєР°, cell - СЏС‡РµР№РєР°
 //        sheet.createRow(sheet.getPhysicalNumberOfRows()-12).createCell(1).setCellValue(elements.get(elements.size()-1).getName());
-//        //cell.setCellValue("Modified " + r); //задаем значение ячейки
+//        //cell.setCellValue("Modified " + r); //Р·Р°РґР°РµРј Р·РЅР°С‡РµРЅРёРµ СЏС‡РµР№РєРё
 //
 //    }
 

@@ -5,128 +5,47 @@ import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import model.*;
+import model.Element;
+import util.FileUtil;
 
 import javax.swing.*;
 import java.io.*;
 
 /**
- * Created by Дмитрий on 17.12.14.
+ * Created by Р”РјРёС‚СЂРёР№ on 17.12.14.
  */
 public class CreateFile {
 
-    private Playground playground;
-    private int count;
+    private static final String rootDir = FileUtil.getRootFolder();
+    private final Playground playground;
 
-    public CreateFile(Playground playground, int count) {
+    public CreateFile(Playground playground) {
         this.playground = playground;
-        this.count = count;
     }
 
 
     public void createPDF() {
         Document document = new Document();
-        try{
-            BaseFont times = BaseFont.createFont("c:/windows/fonts/times.ttf","cp1251", BaseFont.EMBEDDED);
-            PdfWriter.getInstance(document, new FileOutputStream("/DolphinBase/Playground.pdf")).setStrictImageSequence(true);
+        try {
+            PdfWriter.getInstance(document, new FileOutputStream(rootDir + "/Playground.pdf")).setStrictImageSequence(true);
             document.open();
 
-            com.itextpdf.text.Image imageTop = com.itextpdf.text.Image.getInstance("/DolphinBase/Top.jpg");
+            com.itextpdf.text.Image imageTop = com.itextpdf.text.Image.getInstance(rootDir + "/Top.jpg");
             imageTop.scaleToFit(525, 200);
             document.add(imageTop);
             document.add(new Paragraph("  "));
 
-            PdfPTable table = new PdfPTable(7);
-            table.setTotalWidth(400);
-            table.setWidthPercentage(100);
-
-            PdfPCell cell;
-
-            String topTableName [] = {"№ п/п", "Изображение", "Наименование", "Код", "Кол-во (шт.)", "Цена с НДС (грн.)",
-                    "Сумма с НДС (грн.)"};
-            int lenght = 0;
-            while(topTableName.length - lenght > 0) {
-                cell = new PdfPCell(new Phrase(topTableName[lenght], new com.itextpdf.text.Font(times, 10)));
-                cell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-                cell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-                table.addCell(cell);
-                lenght++;
-            }
-            lenght = 0;
-
-            while(playground.getpGroundList().size() > count) {
-                Object column [] = {new Phrase("" + (1 + count), new com.itextpdf.text.Font(times, 10)),
-                        com.itextpdf.text.Image.getInstance("/DolphinBase/images/" + playground.getpGroundList().get(count).getCode() + ".png"),
-                        new Phrase(playground.getpGroundList().get(count).getName(), new com.itextpdf.text.Font(times, 10)),
-                        new Phrase(playground.getpGroundList().get(count).getCode(), new com.itextpdf.text.Font(times, 10)),
-                        new Phrase(String.valueOf(playground.getpGroundList().get(count).getCount()), new com.itextpdf.text.Font(times, 10)),
-                        new Phrase(String.valueOf(playground.getpGroundList().get(count).getPrice()), new com.itextpdf.text.Font(times, 10)),
-                        new Phrase(String.valueOf(playground.getpGroundList().get(count).getCount() * playground.getpGroundList().get(count).getPrice()), new com.itextpdf.text.Font(times, 10))};
-                while(column.length - lenght > 0) {
-                    if(lenght == 1){
-                        Image img = com.itextpdf.text.Image.getInstance("/DolphinBase/images/" + playground.getpGroundList().get(count).getCode() + ".png");
-                        img.scaleToFit(74,74);
-                        cell = new PdfPCell(img);
-                        table.addCell(cell);
-                    } else {
-                        cell = new PdfPCell((Phrase)column[lenght]);
-                        cell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-                        cell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-                        table.addCell(cell);
-                    }
-                    lenght++;
-                }
-                lenght = 0;
-                count++;
-            }
-
-            String inform[] = {"Оборудование (грн.):",
-                    "Монтажные работы \"Dolphin\" ("+ playground.getWorkPricePercent()+ "%" + ") (грн):",
-                    "Скидка (" + playground.getDiscount() +"%):",
-                    "Доставка (грн.):",
-                    "Всего (грн.):"
-
-            };
-
-            Object priceInfo[] = {
-                    playground.getPlayGroundPrise(),
-                    playground.getWorkPrice(),
-                    playground.getDiscountPrice(),
-                    playground.getPriceDelivery(),
-                    playground.getFullPrice()
-            };
-
-
-            int i = 0;
-            while (inform.length - i > 0) {
-                if ((Double)priceInfo[i] == 0.0){
-
-                } else {
-                    cell = new PdfPCell(new Phrase(inform[i], new com.itextpdf.text.Font(times, 10)));
-                    cell.setColspan(6);
-                    cell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-                    cell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-                    table.addCell(cell);
-                    cell = new PdfPCell(new Phrase(String.valueOf(priceInfo[i]), new com.itextpdf.text.Font(times, 10)));
-                    cell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-                    cell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-                    table.addCell(cell);
-                }
-                i++;
-            }
-            cell = new PdfPCell(new Phrase("Адресс доставки: " + playground.getPosition(), new com.itextpdf.text.Font(times, 10)));
-            cell.setColspan(7);
-            table.addCell(cell);
-
+            PdfPTable table = createPdfPTable();
             document.add(table);
+
             document.add(new Paragraph("  "));
-            com.itextpdf.text.Image imageBottom = com.itextpdf.text.Image.getInstance("/DolphinBase/Bottom.jpg");
+            com.itextpdf.text.Image imageBottom = com.itextpdf.text.Image.getInstance(rootDir + "/Bottom.jpg");
             imageBottom.scaleToFit(525, 200);
             document.add(imageBottom);
-            count = 0;
-
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(new JFrame(), "Файл Playground.pdf невозможно создать, проверьте наличие доступа к корневому диску.",
-                    "Невозможно создать файл!",
+            JOptionPane.showMessageDialog(new JFrame(), "Р¤Р°Р№Р» Playground.pdf РЅРµРІРѕР·РјРѕР¶РЅРѕ СЃРѕР·РґР°С‚СЊ, РїСЂРѕРІРµСЂСЊС‚Рµ РЅР°Р»РёС‡РёРµ РґРѕСЃС‚СѓРїР° Рє РєРѕСЂРЅРµРІРѕРјСѓ РґРёСЃРєСѓ.",
+                    "РќРµРІРѕР·РјРѕР¶РЅРѕ СЃРѕР·РґР°С‚СЊ С„Р°Р№Р»!",
                     JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         } catch (DocumentException e) {
@@ -135,33 +54,136 @@ public class CreateFile {
             document.close();
 
         }
+
+        viewPdf();
+    }
+
+    private void viewPdf() {
         try {
-            Runtime.getRuntime().exec("cmd /C " + "/DolphinBase/Playground.pdf");
+            //TODO check correctness of path
+            Runtime.getRuntime().exec("cmd /C " + rootDir + "/Playground.pdf");
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(new JFrame(), "Файл Playground.pdf невозможно открыть, проверьте наличие доступа файлу.",
-                    "Невозможно открыть файл!",
+            JOptionPane.showMessageDialog(new JFrame(), "Р¤Р°Р№Р» Playground.pdf РЅРµРІРѕР·РјРѕР¶РЅРѕ РѕС‚РєСЂС‹С‚СЊ, РїСЂРѕРІРµСЂСЊС‚Рµ РЅР°Р»РёС‡РёРµ РґРѕСЃС‚СѓРїР° С„Р°Р№Р»Сѓ.",
+                    "РќРµРІРѕР·РјРѕР¶РЅРѕ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р»!",
                     JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
-
     }
 
-    //    public void сreateTXT(){
+    private PdfPTable createPdfPTable() throws DocumentException, IOException {
+        PdfPTable table = new PdfPTable(7);
+        table.setTotalWidth(400);
+        table.setWidthPercentage(100);
+
+        BaseFont font = BaseFont.createFont(FileUtil.getRootFolder() + "/fonts/times.ttf", "cp1251", BaseFont.EMBEDDED);
+        createTableTopRow(table, font);
+
+        int elementNumber = 0;
+        for (Element element : playground.getElements()) {
+            Object row[] = {
+                    new Phrase("" + (1 + elementNumber), new Font(font, 10)),
+                    Image.getInstance(rootDir + "/images/" + element.getCode() + ".png"),
+                    new Phrase(element.getName(), new Font(font, 10)),
+                    new Phrase(element.getCode(), new Font(font, 10)),
+                    new Phrase(String.valueOf(element.getCount()), new Font(font, 10)),
+                    new Phrase(String.valueOf(element.getPrice()), new Font(font, 10)),
+                    new Phrase(String.valueOf(element.getCount() * element.getPrice()), new Font(font, 10))
+            };
+            elementNumber++;
+
+            for (int columnIndex = 0; columnIndex < row.length; columnIndex++) {
+                if (columnIndex == 1) {
+                    Image img = Image.getInstance(rootDir + "/images/" + element.getCode() + ".png");
+                    img.scaleToFit(74, 74);
+                    PdfPCell cell = new PdfPCell(img);
+                    table.addCell(cell);
+                } else {
+                    Phrase phrase = (Phrase) row[columnIndex];
+                    PdfPCell cell = new PdfPCell(phrase);
+                    cell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+                    cell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+                    table.addCell(cell);
+                }
+            }
+        }
+
+        addPriceInfo(table, font);
+
+        PdfPCell addressCell = new PdfPCell(new Phrase("РђРґСЂРµСЃСЃ РґРѕСЃС‚Р°РІРєРё: " + playground.getPosition(), new Font(font, 10)));
+        addressCell.setColspan(7);
+        table.addCell(addressCell);
+        return table;
+    }
+
+    private void createTableTopRow(PdfPTable table, BaseFont times) throws DocumentException, IOException {
+        String topTableNames[] = {"в„– Рї/Рї", "РР·РѕР±СЂР°Р¶РµРЅРёРµ", "РќР°РёРјРµРЅРѕРІР°РЅРёРµ", "РљРѕРґ", "РљРѕР»-РІРѕ (С€С‚.)", "Р¦РµРЅР° СЃ РќР”РЎ (РіСЂРЅ.)",
+                "РЎСѓРјРјР° СЃ РќР”РЎ (РіСЂРЅ.)"};
+        for (String columnName : topTableNames) {
+            PdfPCell cell = new PdfPCell(new Phrase(columnName, new Font(times, 10)));
+            cell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+            cell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+            table.addCell(cell);
+        }
+    }
+
+    private void addPriceInfo(PdfPTable table, BaseFont times) {
+        String[] inform = getInfo();
+        Double[] priceInfo = getPriceInfo();
+
+        int i = 0;
+        while (inform.length - i > 0) {
+            Double price = priceInfo[i];
+            if (price != 0.0) {
+                PdfPCell cell = new PdfPCell(new Phrase(inform[i], new Font(times, 10)));
+                cell.setColspan(6);
+                cell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
+                cell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+                table.addCell(cell);
+                cell = new PdfPCell(new Phrase(String.valueOf(price), new Font(times, 10)));
+                cell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+                cell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+                table.addCell(cell);
+            }
+            i++;
+        }
+    }
+
+    private String[] getInfo() {
+        return new String[]{"РћР±РѕСЂСѓРґРѕРІР°РЅРёРµ (РіСЂРЅ.):",
+                "РњРѕРЅС‚Р°Р¶РЅС‹Рµ СЂР°Р±РѕС‚С‹ \"Dolphin\" (" + playground.getWorkPricePercent() + "%" + ") (РіСЂРЅ):",
+                "РЎРєРёРґРєР° (" + playground.getDiscount() + "%):",
+                "Р”РѕСЃС‚Р°РІРєР° (РіСЂРЅ.):",
+                "Р’СЃРµРіРѕ (РіСЂРЅ.):"
+
+        };
+    }
+
+    private Double[] getPriceInfo() {
+        return new Double[]{
+                playground.getPlayGroundPrise(),
+                playground.getWorkPrice(),
+                playground.getDiscountPrice(),
+                playground.getPriceDelivery(),
+                playground.getFullPrice()
+        };
+    }
+
+    //    public void СЃreateTXT(){
 //        Writer writer = null;
 //        try {
 //            writer = new BufferedWriter(new OutputStreamWriter(
-//                    new FileOutputStream(new File("/DolphinBase/Playground.txt")), "utf-8"));
+//                    new FileOutputStream(new File(rootDir + "/Playground.txt")), "utf-8"));
 //
 //            writer.write(
-//                    "Общая цена площадки = " + playground.getPlayGroundPrise() + " грн." + "\n" + "\n" +
-//                            "Площадка состоит из " + playground.getElemNumber() + " элементов: " + "\n" + "\n"
+//                    "РћР±С‰Р°СЏ С†РµРЅР° РїР»РѕС‰Р°РґРєРё = " + playground.getPlayGroundPrise() + " РіСЂРЅ." + "\n" + "\n" +
+//                            "РџР»РѕС‰Р°РґРєР° СЃРѕСЃС‚РѕРёС‚ РёР· " + playground.getElemNumber() + " СЌР»РµРјРµРЅС‚РѕРІ: " + "\n" + "\n"
 //            );
-//            // Открываем сохраненный файл.
+//            // РћС‚РєСЂС‹РІР°РµРј СЃРѕС…СЂР°РЅРµРЅРЅС‹Р№ С„Р°Р№Р».
 //            Runtime.getRuntime().exec("cmd /C " + "/DolphinBase/Playground.txt");
 //
 //        } catch (IOException ex) {
-//            JOptionPane.showMessageDialog(new JFrame(), "Файл Playground.txt невозможно создать, проверьте наличие доступа к корневому диску.",
-//                    "Невозможно создать файл!",
+//            JOptionPane.showMessageDialog(new JFrame(), "Р¤Р°Р№Р» Playground.txt РЅРµРІРѕР·РјРѕР¶РЅРѕ СЃРѕР·РґР°С‚СЊ, РїСЂРѕРІРµСЂСЊС‚Рµ РЅР°Р»РёС‡РёРµ РґРѕСЃС‚СѓРїР° Рє РєРѕСЂРЅРµРІРѕРјСѓ РґРёСЃРєСѓ.",
+//                    "РќРµРІРѕР·РјРѕР¶РЅРѕ СЃРѕР·РґР°С‚СЊ С„Р°Р№Р»!",
 //                    JOptionPane.ERROR_MESSAGE);
 //        } finally {
 //            try {
@@ -179,15 +201,15 @@ public class CreateFile {
 //                    new FileOutputStream(new File("/DolphinBase/Playground.doc")), "utf-8"));
 //
 //            writer.write(
-//                    "Общая цена площадки = " + playground.getPlayGroundPrise() + " грн." + "\n" + "\n" +
-//                            "Площадка состоит из " + playground.getElemNumber() + " элементов: " + "\n" + "\n"
+//                    "РћР±С‰Р°СЏ С†РµРЅР° РїР»РѕС‰Р°РґРєРё = " + playground.getPlayGroundPrise() + " РіСЂРЅ." + "\n" + "\n" +
+//                            "РџР»РѕС‰Р°РґРєР° СЃРѕСЃС‚РѕРёС‚ РёР· " + playground.getElemNumber() + " СЌР»РµРјРµРЅС‚РѕРІ: " + "\n" + "\n"
 //            );
-//            // Открываем сохраненный файл.
+//            // РћС‚РєСЂС‹РІР°РµРј СЃРѕС…СЂР°РЅРµРЅРЅС‹Р№ С„Р°Р№Р».
 //            Runtime.getRuntime().exec("cmd /C " + "/DolphinBase/Playground.doc");
 //
 //        } catch (IOException ex) {
-//            JOptionPane.showMessageDialog(new JFrame(), "Файл Playground.doc невозможно создать, проверьте наличие доступа к корневому диску.",
-//                    "Невозможно создать файл!",
+//            JOptionPane.showMessageDialog(new JFrame(), "Р¤Р°Р№Р» Playground.doc РЅРµРІРѕР·РјРѕР¶РЅРѕ СЃРѕР·РґР°С‚СЊ, РїСЂРѕРІРµСЂСЊС‚Рµ РЅР°Р»РёС‡РёРµ РґРѕСЃС‚СѓРїР° Рє РєРѕСЂРЅРµРІРѕРјСѓ РґРёСЃРєСѓ.",
+//                    "РќРµРІРѕР·РјРѕР¶РЅРѕ СЃРѕР·РґР°С‚СЊ С„Р°Р№Р»!",
 //                    JOptionPane.ERROR_MESSAGE);
 //        } finally {
 //            try {

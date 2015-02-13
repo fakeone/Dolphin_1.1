@@ -1,15 +1,13 @@
 package view;
 
 import service.BaseExcel;
-import service.Element;
+import model.Element;
 
 import javax.swing.*;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class MyFirstTableModel implements TableModel  {
 
@@ -19,15 +17,25 @@ public class MyFirstTableModel implements TableModel  {
     public static final int CODE_COLUMN = 3;
     public static final int PRICE_COLUMN = 4;
     public static final int COUNT_COLUMN = 5;
+
     private BaseExcel baseExcel = new BaseExcel();
     private Set<TableModelListener> listeners = new HashSet<TableModelListener>();
     private List<Element> elements;
+    private String excelFile;
+    //map of pairs (row -> elemnt in row chosen)
+    private Map<Integer, Boolean> map = new HashMap<>();
 
-    public MyFirstTableModel() {}
+    protected MyFirstTableModel() {
 
-    public MyFirstTableModel(List<Element> elements) {
-        this.elements = elements;
     }
+
+    public MyFirstTableModel(String excelFile) {this.excelFile = excelFile;}
+
+    public MyFirstTableModel(List<Element> elements, String excelFile) {
+        this.elements = elements;
+        this.excelFile = excelFile;
+    }
+
     @Override
     public void addTableModelListener(TableModelListener listener) {
         listeners.add(listener);
@@ -48,7 +56,7 @@ public class MyFirstTableModel implements TableModel  {
             case COUNT_COLUMN:
                 return Integer.class;
         }
-            return Object.class;
+        return Object.class;
 
     }
     @Override
@@ -59,17 +67,17 @@ public class MyFirstTableModel implements TableModel  {
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
             case IMAGE_COLUMN:
-                return "Изображение";
+                return "РР·РѕР±СЂР°Р¶РµРЅРёРµ";
             case NAME_COLUMN:
-                return "Название";
+                return "РќР°Р·РІР°РЅРёРµ";
             case SIZE_COLUMN:
-                return "Размеры(мм)";
+                return "Р Р°Р·РјРµСЂС‹(РјРј)";
             case CODE_COLUMN:
-                return "Код";
+                return "РљРѕРґ";
             case PRICE_COLUMN:
-                return "Цена(грн.)";
+                return "Р¦РµРЅР°(РіСЂРЅ.)";
             case COUNT_COLUMN:
-                return "Количество";
+                return "РљРѕР»РёС‡РµСЃС‚РІРѕ";
         }
         return "";
     }
@@ -85,12 +93,12 @@ public class MyFirstTableModel implements TableModel  {
                 try {
                     return new ImageIcon(element.getImage());
                 } catch (Exception e) {
-                    JOptionPane.showMessageDialog(new JFrame(), "Отсутствует изображение для " + element.getName() + ".\n"+
-                    "Программа будет закрыта, добавьте изображение и перезапустите программу.",
-                            "Отсутствует изображение!",
+                    JOptionPane.showMessageDialog(new JFrame(), "РћС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РґР»СЏ " + element.getName() + ".\n"+
+                                    "РџСЂРѕРіСЂР°РјРјР° Р±СѓРґРµС‚ Р·Р°РєСЂС‹С‚Р°, РґРѕР±Р°РІСЊС‚Рµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ Рё РїРµСЂРµР·Р°РїСѓСЃС‚РёС‚Рµ РїСЂРѕРіСЂР°РјРјСѓ.",
+                            "РћС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РёР·РѕР±СЂР°Р¶РµРЅРёРµ!",
                             JOptionPane.ERROR_MESSAGE);
                     System.exit(0);
-            }
+                }
             case NAME_COLUMN:
                 return element.getName();
             case SIZE_COLUMN:
@@ -120,14 +128,14 @@ public class MyFirstTableModel implements TableModel  {
                 element.setName((String)value);
                 break;
             case PRICE_COLUMN:
-                int response = JOptionPane.showConfirmDialog(null, "Подтвердите изменение цены элемента!");
+                int response = JOptionPane.showConfirmDialog(null, "РџРѕРґС‚РІРµСЂРґРёС‚Рµ РёР·РјРµРЅРµРЅРёРµ С†РµРЅС‹ СЌР»РµРјРµРЅС‚Р°!");
                 if (response == 0) {
                     element.setPrice((Double)value);
                     try {
-                        baseExcel.changePrice();
+                        baseExcel.changePrice(excelFile);
                     } catch (IOException e) {
-                        JOptionPane.showMessageDialog(new JFrame(), "Закройте Excel файл с базой ",
-                                "Файл открыт!",
+                        JOptionPane.showMessageDialog(new JFrame(), "Р—Р°РєСЂРѕР№С‚Рµ Excel С„Р°Р№Р» СЃ Р±Р°Р·РѕР№ ",
+                                "Р¤Р°Р№Р» РѕС‚РєСЂС‹С‚!",
                                 JOptionPane.ERROR_MESSAGE);
                         e.printStackTrace();
                     }
@@ -137,7 +145,7 @@ public class MyFirstTableModel implements TableModel  {
                 element.setCount((Integer)value);
                 break;
         }
-        //Запись "elements" в базу.
+        //Р—Р°РїРёСЃСЊ "elements" РІ Р±Р°Р·Сѓ.
 
     }
 
@@ -149,5 +157,11 @@ public class MyFirstTableModel implements TableModel  {
         this.elements = elements;
     }
 
-}
+    public void elementChosenInRow(int editingRow, boolean elementChosen) {
+        map.put(editingRow, elementChosen);
+    }
 
+    public boolean IsRowElementChosen(int row) {
+        return map.containsKey(row) && map.get(row);
+    }
+}

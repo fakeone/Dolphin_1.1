@@ -1,329 +1,416 @@
 package view;
 
+import importer.IgnoreCodesReader;
+import importer.SchemeFileParser;
+import model.*;
 import service.*;
+import util.FileUtil;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
+import java.util.List;
 
 public class MainWindow extends JFrame {
 
-    private static String helpInfo = "По всем вопросам обращаться по телефону (066) 093-19-00 Дмитрий";
-    private static String information = "Миссия компании OOO «ДОЛФИН» - максимальное удовлетворение потребностей заказчиков \n" +
-            "при высоком уровне ответственности и профессионализма.\n" +
+    private static String information = "РњРёСЃСЃРёСЏ РєРѕРјРїР°РЅРёРё OOO В«Р”РћР›Р¤РРќВ» - РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ СѓРґРѕРІР»РµС‚РІРѕСЂРµРЅРёРµ РїРѕС‚СЂРµР±РЅРѕСЃС‚РµР№ Р·Р°РєР°Р·С‡РёРєРѕРІ \n" +
+            "РїСЂРё РІС‹СЃРѕРєРѕРј СѓСЂРѕРІРЅРµ РѕС‚РІРµС‚СЃС‚РІРµРЅРЅРѕСЃС‚Рё Рё РїСЂРѕС„РµСЃСЃРёРѕРЅР°Р»РёР·РјР°.\n" +
             "\n" +
-            "Почему мы?\n" +
-            "Все просто! При работе с нами вы получаете такие преимущества как:\n" +
-            "* Богатый выбор оборудования монтируемого на детские игровые и спортивные площадки;\n" +
-            "* Мобильность и скорость выполнения заказов на детские площадки;\n" +
-            "* Безопасность игровых комплексов детской площадки;\n" +
-            "* Мы сможем учесть особенности именно вашего объекта и подобрать то оборудование, \n" +
-            "что соответствует вашим желаниям и возможностям;\n" +
-            "* Мы быстро реагируем на любые изменения и охотно воплощаем перспективные новинки;\n" +
-            "* Наша компания непрерывно расширяет свой ассортимент продукции (качели, детские горки, \n" +
-            "игровые комплексы, спортивные и детские площадки).\n" +
-            "Преимущества наших детских площадок - они изготовлены из экологического сырья и полностью безопасны,\n" +
-            "обладают привлекательным дизайном игровых элементов и радуют доступной ценой! \n" +
+            "РџРѕС‡РµРјСѓ РјС‹?\n" +
+            "Р’СЃРµ РїСЂРѕСЃС‚Рѕ! РџСЂРё СЂР°Р±РѕС‚Рµ СЃ РЅР°РјРё РІС‹ РїРѕР»СѓС‡Р°РµС‚Рµ С‚Р°РєРёРµ РїСЂРµРёРјСѓС‰РµСЃС‚РІР° РєР°Рє:\n" +
+            "* Р‘РѕРіР°С‚С‹Р№ РІС‹Р±РѕСЂ РѕР±РѕСЂСѓРґРѕРІР°РЅРёСЏ РјРѕРЅС‚РёСЂСѓРµРјРѕРіРѕ РЅР° РґРµС‚СЃРєРёРµ РёРіСЂРѕРІС‹Рµ Рё СЃРїРѕСЂС‚РёРІРЅС‹Рµ РїР»РѕС‰Р°РґРєРё;\n" +
+            "* РњРѕР±РёР»СЊРЅРѕСЃС‚СЊ Рё СЃРєРѕСЂРѕСЃС‚СЊ РІС‹РїРѕР»РЅРµРЅРёСЏ Р·Р°РєР°Р·РѕРІ РЅР° РґРµС‚СЃРєРёРµ РїР»РѕС‰Р°РґРєРё;\n" +
+            "* Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ РёРіСЂРѕРІС‹С… РєРѕРјРїР»РµРєСЃРѕРІ РґРµС‚СЃРєРѕР№ РїР»РѕС‰Р°РґРєРё;\n" +
+            "* РњС‹ СЃРјРѕР¶РµРј СѓС‡РµСЃС‚СЊ РѕСЃРѕР±РµРЅРЅРѕСЃС‚Рё РёРјРµРЅРЅРѕ РІР°С€РµРіРѕ РѕР±СЉРµРєС‚Р° Рё РїРѕРґРѕР±СЂР°С‚СЊ С‚Рѕ РѕР±РѕСЂСѓРґРѕРІР°РЅРёРµ, \n" +
+            "С‡С‚Рѕ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ РІР°С€РёРј Р¶РµР»Р°РЅРёСЏРј Рё РІРѕР·РјРѕР¶РЅРѕСЃС‚СЏРј;\n" +
+            "* РњС‹ Р±С‹СЃС‚СЂРѕ СЂРµР°РіРёСЂСѓРµРј РЅР° Р»СЋР±С‹Рµ РёР·РјРµРЅРµРЅРёСЏ Рё РѕС…РѕС‚РЅРѕ РІРѕРїР»РѕС‰Р°РµРј РїРµСЂСЃРїРµРєС‚РёРІРЅС‹Рµ РЅРѕРІРёРЅРєРё;\n" +
+            "* РќР°С€Р° РєРѕРјРїР°РЅРёСЏ РЅРµРїСЂРµСЂС‹РІРЅРѕ СЂР°СЃС€РёСЂСЏРµС‚ СЃРІРѕР№ Р°СЃСЃРѕСЂС‚РёРјРµРЅС‚ РїСЂРѕРґСѓРєС†РёРё (РєР°С‡РµР»Рё, РґРµС‚СЃРєРёРµ РіРѕСЂРєРё, \n" +
+            "РёРіСЂРѕРІС‹Рµ РєРѕРјРїР»РµРєСЃС‹, СЃРїРѕСЂС‚РёРІРЅС‹Рµ Рё РґРµС‚СЃРєРёРµ РїР»РѕС‰Р°РґРєРё).\n" +
+            "РџСЂРµРёРјСѓС‰РµСЃС‚РІР° РЅР°С€РёС… РґРµС‚СЃРєРёС… РїР»РѕС‰Р°РґРѕРє - РѕРЅРё РёР·РіРѕС‚РѕРІР»РµРЅС‹ РёР· СЌРєРѕР»РѕРіРёС‡РµСЃРєРѕРіРѕ СЃС‹СЂСЊСЏ Рё РїРѕР»РЅРѕСЃС‚СЊСЋ Р±РµР·РѕРїР°СЃРЅС‹,\n" +
+            "РѕР±Р»Р°РґР°СЋС‚ РїСЂРёРІР»РµРєР°С‚РµР»СЊРЅС‹Рј РґРёР·Р°Р№РЅРѕРј РёРіСЂРѕРІС‹С… СЌР»РµРјРµРЅС‚РѕРІ Рё СЂР°РґСѓСЋС‚ РґРѕСЃС‚СѓРїРЅРѕР№ С†РµРЅРѕР№! \n" +
             "\n" +
-            "С нашей компанией легко работать!\n" +
-            "* У нас есть художники и дизайнеры, они помогут смоделировать детские площадки с учетом особенностей \n" +
-            "вашего ландшафта. Или создадут индивидуальный дизайн.\n" +
-            "* Высококвалифицированные специалисты с легкостью осуществят монтаж сложных конструкций на детской площадке.\n" +
-            "* Мы поможем осуществить комплексное проектирование детской игровой зоны и полностью оснастить ее \n" +
-            "необходимым оборудованием.\n" +
-            "* Мы легко сможем доставить в короткие сроки наши детские и спортивно игровые площадки в любой уголок \n" +
-            "нашей страны. \n" +
-            "Профессиональный подход нашей команды разносторонних специалистов отличает нашу компанию и позволяет \n" +
-            "предоставлять услуги высокого уровня. Инженеры и разработчики проявили максимум фантазии, а также \n" +
-            "тщательно проработали каждую деталь игровых элементов в соответствии с параметром надежности.\n" +
+            "РЎ РЅР°С€РµР№ РєРѕРјРїР°РЅРёРµР№ Р»РµРіРєРѕ СЂР°Р±РѕС‚Р°С‚СЊ!\n" +
+            "* РЈ РЅР°СЃ РµСЃС‚СЊ С…СѓРґРѕР¶РЅРёРєРё Рё РґРёР·Р°Р№РЅРµСЂС‹, РѕРЅРё РїРѕРјРѕРіСѓС‚ СЃРјРѕРґРµР»РёСЂРѕРІР°С‚СЊ РґРµС‚СЃРєРёРµ РїР»РѕС‰Р°РґРєРё СЃ СѓС‡РµС‚РѕРј РѕСЃРѕР±РµРЅРЅРѕСЃС‚РµР№ \n" +
+            "РІР°С€РµРіРѕ Р»Р°РЅРґС€Р°С„С‚Р°. РР»Рё СЃРѕР·РґР°РґСѓС‚ РёРЅРґРёРІРёРґСѓР°Р»СЊРЅС‹Р№ РґРёР·Р°Р№РЅ.\n" +
+            "* Р’С‹СЃРѕРєРѕРєРІР°Р»РёС„РёС†РёСЂРѕРІР°РЅРЅС‹Рµ СЃРїРµС†РёР°Р»РёСЃС‚С‹ СЃ Р»РµРіРєРѕСЃС‚СЊСЋ РѕСЃСѓС‰РµСЃС‚РІСЏС‚ РјРѕРЅС‚Р°Р¶ СЃР»РѕР¶РЅС‹С… РєРѕРЅСЃС‚СЂСѓРєС†РёР№ РЅР° РґРµС‚СЃРєРѕР№ РїР»РѕС‰Р°РґРєРµ.\n" +
+            "* РњС‹ РїРѕРјРѕР¶РµРј РѕСЃСѓС‰РµСЃС‚РІРёС‚СЊ РєРѕРјРїР»РµРєСЃРЅРѕРµ РїСЂРѕРµРєС‚РёСЂРѕРІР°РЅРёРµ РґРµС‚СЃРєРѕР№ РёРіСЂРѕРІРѕР№ Р·РѕРЅС‹ Рё РїРѕР»РЅРѕСЃС‚СЊСЋ РѕСЃРЅР°СЃС‚РёС‚СЊ РµРµ \n" +
+            "РЅРµРѕР±С…РѕРґРёРјС‹Рј РѕР±РѕСЂСѓРґРѕРІР°РЅРёРµРј.\n" +
+            "* РњС‹ Р»РµРіРєРѕ СЃРјРѕР¶РµРј РґРѕСЃС‚Р°РІРёС‚СЊ РІ РєРѕСЂРѕС‚РєРёРµ СЃСЂРѕРєРё РЅР°С€Рё РґРµС‚СЃРєРёРµ Рё СЃРїРѕСЂС‚РёРІРЅРѕ РёРіСЂРѕРІС‹Рµ РїР»РѕС‰Р°РґРєРё РІ Р»СЋР±РѕР№ СѓРіРѕР»РѕРє \n" +
+            "РЅР°С€РµР№ СЃС‚СЂР°РЅС‹. \n" +
+            "РџСЂРѕС„РµСЃСЃРёРѕРЅР°Р»СЊРЅС‹Р№ РїРѕРґС…РѕРґ РЅР°С€РµР№ РєРѕРјР°РЅРґС‹ СЂР°Р·РЅРѕСЃС‚РѕСЂРѕРЅРЅРёС… СЃРїРµС†РёР°Р»РёСЃС‚РѕРІ РѕС‚Р»РёС‡Р°РµС‚ РЅР°С€Сѓ РєРѕРјРїР°РЅРёСЋ Рё РїРѕР·РІРѕР»СЏРµС‚ \n" +
+            "РїСЂРµРґРѕСЃС‚Р°РІР»СЏС‚СЊ СѓСЃР»СѓРіРё РІС‹СЃРѕРєРѕРіРѕ СѓСЂРѕРІРЅСЏ. РРЅР¶РµРЅРµСЂС‹ Рё СЂР°Р·СЂР°Р±РѕС‚С‡РёРєРё РїСЂРѕСЏРІРёР»Рё РјР°РєСЃРёРјСѓРј С„Р°РЅС‚Р°Р·РёРё, Р° С‚Р°РєР¶Рµ \n" +
+            "С‚С‰Р°С‚РµР»СЊРЅРѕ РїСЂРѕСЂР°Р±РѕС‚Р°Р»Рё РєР°Р¶РґСѓСЋ РґРµС‚Р°Р»СЊ РёРіСЂРѕРІС‹С… СЌР»РµРјРµРЅС‚РѕРІ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ РїР°СЂР°РјРµС‚СЂРѕРј РЅР°РґРµР¶РЅРѕСЃС‚Рё.\n" +
             "\n" +
-            "Радость для наших детей и их родителей - наше главное желание. Давайте дарить радость вместе!";
+            "Р Р°РґРѕСЃС‚СЊ РґР»СЏ РЅР°С€РёС… РґРµС‚РµР№ Рё РёС… СЂРѕРґРёС‚РµР»РµР№ - РЅР°С€Рµ РіР»Р°РІРЅРѕРµ Р¶РµР»Р°РЅРёРµ. Р”Р°РІР°Р№С‚Рµ РґР°СЂРёС‚СЊ СЂР°РґРѕСЃС‚СЊ РІРјРµСЃС‚Рµ!";
 
-    private static JScrollPane sPane2 = new JScrollPane();
     private static int count = 0;
     private static Playground playground = new Playground();
     private static JTextField JTFFilter = new JTextField();
-    private static JLabel fullPrise = new JLabel();
     private static final Font font = new Font("Verdana", Font.PLAIN, 11);
     private static final Font font2 = new Font("Verdana", Font.PLAIN, 18);
-    private static MySecondTableModel secondTable = new MySecondTableModel();
-    private static JTable playGroundTable = new JTable();
-    public static final String dolphinImage = "/DolphinBase/1dolphin.png";
+
+    //UI
+    private static JPanel panel;
+    private static JTable firstTable;
+    private static JTable secondTable;
+    private static JScrollPane sPane;
+    private static JScrollPane sPane2 = new JScrollPane();
+    private static JLabel fullPrise;
+
+    //Model
+    private static MyFirstTableModel firstTableModel;
+    private static MySecondTableModel secondTableModel;
+
+    private static BaseExcel baseExcel;
+    private static final String rootFolder = FileUtil.getRootFolder();
+
+    private static String excelFile = rootFolder + "/Price.xls"; //TODO calculate relative path
+    public static final String dolphinImage = rootFolder + "/1dolphin.png";
+
 
     public static void createGUI() throws IOException {
 
-        // Создаем главное окно.
-            final MainWindow frame = new MainWindow();
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Теперь окно можно закрыть и программа завершится.
-            frame.setTitle("Dolphin - детские площадки!"); // Заголовок окна.
-        // Задаем картинку заголовка главного окна.
-            Image im =Toolkit.getDefaultToolkit().getImage(dolphinImage);
-            frame.setIconImage(im);
 
-        // Создаем panel и делаем разметку.
-            final JPanel panel = new JPanel();
-            BorderLayout layout = new BorderLayout();
-            panel.setLayout(layout);
-        // Загружаем базу из файла.
-            BaseExcel baseExcel = new BaseExcel();
-            baseExcel.readBaseExcel("/DolphinBase/Price.xls");
-            baseExcel.readBaseExcel("/DolphinBase/MODPrice.xls");
-        // Создаем первую таблицу с базой.
-            final MyFirstTableModel myFirstTableModel = new MyFirstTableModel(baseExcel.getBaseList());
-            final JTable baseTable = new JTable(myFirstTableModel);
-        // Сортировка по названию.
-            final TableRowSorter<MyFirstTableModel> sorter = new TableRowSorter<MyFirstTableModel>(myFirstTableModel);
-            baseTable.setRowSorter(sorter);
-            baseTable.setRowHeight(80);
-            final JScrollPane sPane = new JScrollPane(baseTable);
-            panel.add(sPane, BorderLayout.CENTER);
-        // Поиск элементов в таблице с базой.
-            panel.add(JTFFilter, BorderLayout.SOUTH);
-            JTFFilter.getDocument().addDocumentListener(new Search(JTFFilter, sorter));
-        // Создаем меню.
-            JMenuBar menuBar = new JMenuBar(); // Создаем бар меню.
-            JMenu menu = new JMenu("Меню"); // Создаем элемент меню.
-            menu.setFont(font); // Применяем шрифт.
+        // Р—Р°РіСЂСѓР¶Р°РµРј Р±Р°Р·Сѓ РёР· С„Р°Р№Р»Р°.
+        //TODO fix paths
+        baseExcel = new BaseExcel();
+        baseExcel.readBaseExcel(excelFile);
+        baseExcel.readBaseExcel(rootFolder + "/MODPrice.xls");
 
+        // РЎРѕР·РґР°РµРј panel Рё РґРµР»Р°РµРј СЂР°Р·РјРµС‚РєСѓ.
+        panel = new JPanel();
+        BorderLayout layout = new BorderLayout();
+        panel.setLayout(layout);
+
+        // РЎРѕР·РґР°РµРј РїРµСЂРІСѓСЋ С‚Р°Р±Р»РёС†Сѓ СЃ Р±Р°Р·РѕР№.
+        createFistTableAndModel(panel);
+        panel.add(sPane, BorderLayout.CENTER);
+        // РџРѕРёСЃРє СЌР»РµРјРµРЅС‚РѕРІ РІ С‚Р°Р±Р»РёС†Рµ СЃ Р±Р°Р·РѕР№.
+        panel.add(JTFFilter, BorderLayout.SOUTH);
         panel.remove(sPane2);
-        sPane2 = new JScrollPane(playGroundTable);
-        panel.remove(fullPrise);
+        sPane2 = new JScrollPane(new JTable());//TODO is it needed?
+        fullPrise = new JLabel("", JLabel.CENTER);
+        fullPrise.setFont(font2);
         panel.add(fullPrise, BorderLayout.NORTH);
-        sPane.updateUI();
         panel.add(sPane2, BorderLayout.EAST);
         panel.updateUI();
 
+        // РЎРѕР·РґР°РµРј РіР»Р°РІРЅРѕРµ РѕРєРЅРѕ.
+        final MainWindow frame = new MainWindow();
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE); // РўРµРїРµСЂСЊ РѕРєРЅРѕ РјРѕР¶РЅРѕ Р·Р°РєСЂС‹С‚СЊ Рё РїСЂРѕРіСЂР°РјРјР° Р·Р°РІРµСЂС€РёС‚СЃСЏ.
+        frame.setTitle("Dolphin - РґРµС‚СЃРєРёРµ РїР»РѕС‰Р°РґРєРё!"); // Р—Р°РіРѕР»РѕРІРѕРє РѕРєРЅР°.
+        // Р—Р°РґР°РµРј РєР°СЂС‚РёРЅРєСѓ Р·Р°РіРѕР»РѕРІРєР° РіР»Р°РІРЅРѕРіРѕ РѕРєРЅР°.
+        Image im = Toolkit.getDefaultToolkit().getImage(dolphinImage);
+        frame.setIconImage(im);
+        // РЎРѕР·РґР°РµРј РјРµРЅСЋ.
+        JMenuBar menuBar = createMenu(frame);
+        frame.setJMenuBar(menuBar);
+        frame.getContentPane().add(panel);
+        frame.setPreferredSize(new Dimension(1320, 700));
+        frame.pack(); // Р”Р»СЏ С‚РѕРіРѕ С‡С‚Рѕ Р±С‹ РІСЃРµ СЌР»РµРјРµРЅС‚С‹ РІР»РµР·Р»Рё РІ РѕРєРЅРѕ.
+        frame.setLocationRelativeTo(null);   //РѕРєРЅРѕ РїРѕСЏРІР»СЏРµС‚СЃСЏ РІ С†РµРЅС‚СЂРµ СЌРєСЂР°РЅР°, Р° РЅРµ СЃР»РµРІР°
+        frame.setVisible(true);
+    }
 
-//        baseTable.setDefaultRenderer(TableColumn.class, new DefaultTableCellRenderer() {
-//            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-//                // value - значение, кот. хранится в ячейке
-//                Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-//                if ((Integer)value > 0) {
-//                    component.setBackground(Color.red);
-//                }
-//                return component;
-//            }
-//        });
+    private static void createFistTableAndModel(JPanel panel) {
+        firstTableModel = new MyFirstTableModel(baseExcel.getBaseList(), excelFile);
+        firstTable = new JTable(firstTableModel);
+        // РЎРѕСЂС‚РёСЂРѕРІРєР° РїРѕ РЅР°Р·РІР°РЅРёСЋ.
+        final TableRowSorter<MyFirstTableModel> sorter = new TableRowSorter<MyFirstTableModel>(firstTableModel);
+        JTFFilter.getDocument().addDocumentListener(new Search(JTFFilter, sorter));
+        firstTable.setRowSorter(sorter);
+        firstTable.setRowHeight(80);
+        firstTable.setDefaultRenderer(Object.class, new FirstTableRenderer());
 
-//        final DefaultTableCellRenderer renderer = new DefaultTableCellRenderer(){
-//            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column){
-//                Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-//                //if(column == 5) {
-//                    if((Integer)value > 0){
-//                        cell.setBackground(Color.RED);
-//                    }
-//                //}
-//                return cell;
-//            }
-//        };
-//        for(int i=0; i<baseTable.getColumnCount(); i++){
-//
-//        }
+        sPane = new JScrollPane(firstTable);
+        // РћР±РЅРѕРІР»РµРЅРёРµ С‚Р°Р±Р»РёС†С‹ РїР»РѕС‰Р°РґРєРё РїСЂРё Р»СЋР±РѕРј РєР»РёРєРµ РјС‹С€РєРѕР№.
+        firstTable.getSelectionModel().addListSelectionListener(
+                new FirstTableListener());
+        sPane.updateUI();
+    }
 
-        // Обновление таблицы площадки при любом клике мышкой.
-        baseTable.getSelectionModel().addListSelectionListener(
-                new ListSelectionListener() {
-                    public void valueChanged(ListSelectionEvent event) {
-                        ArrayList<Element> chouseElem = new ArrayList<Element>();
-                        // Выбираем элементы в таблице, количество которых не равно нулю.
-                        while (myFirstTableModel.getElements().size() > count) {
-                            if (myFirstTableModel.getElements().get(count).getCount() > 0) {
-                                chouseElem.add(myFirstTableModel.getElements().get(count));
-                               //baseTable.getCellRenderer(count,5).getTableCellRendererComponent(baseTable, 0, false, false, 5, 1).setBackground(Color.BLUE);
+    private static JMenuBar createMenu(final MainWindow frame) {
+        JMenuBar menuBar = new JMenuBar(); // РЎРѕР·РґР°РµРј Р±Р°СЂ РјРµРЅСЋ.
+        JMenu menu = new JMenu("РњРµРЅСЋ"); // РЎРѕР·РґР°РµРј СЌР»РµРјРµРЅС‚ РјРµРЅСЋ.
+        menu.setFont(font); // РџСЂРёРјРµРЅСЏРµРј С€СЂРёС„С‚.
 
-                                //baseTable.getColumnModel().getColumn(5).setCellRenderer(renderer);
-                            }
+        JMenuItem openPrice = createOpenPriceMenuItem();
+        menu.add(openPrice);
+        JMenuItem openScheme = createOpenSchemeMenuItem();
+        menu.add(openScheme);
+        menu.addSeparator();
+        JMenuItem exitItem = createExitMenuItem(menu);
+        menu.add(exitItem);
 
-                                count++;
-                            }
+        JMenu file = new JMenu("РЎРѕС…СЂР°РЅРёС‚СЊ РІ С„Р°Р№Р»");
+        file.setFont(font);
 
-                        count = 0;
-                        // Добавляем элементы с количеством больше нуля в площадку.
-                        playground.setpGroundList(chouseElem);
-                        // Создаем вторую таблицу для площадки и выводим на экран.
-                        secondTable = new MySecondTableModel(playground.getpGroundList());
-                        playGroundTable = new JTable(secondTable);
+        JMenuItem pdf = createPdfMenuItem();
+        file.add(pdf);
 
-                        playGroundTable.addFocusListener(new FocusListener() {
-                            @Override
-                            public void focusGained(FocusEvent e) {
-                                JTFFilter.setText("");
-                                if (playGroundTable.getSelectedRow() != -1) {
-                                    int response = JOptionPane.showConfirmDialog(null, "Вы действительно хотите убрать элемент из площадки?");
-                                    if (response == 0) {
-                                        String a = (String) secondTable.getValueAt(playGroundTable.getSelectedRow(), MyFirstTableModel.CODE_COLUMN);
+        JMenu info = new JMenu("РРЅС„РѕСЂРјР°С†РёСЏ");
+        info.setFont(font);
 
-                                        for (int i = 0; i <= myFirstTableModel.getElements().size()-1; i++) {
-                                            if (a == baseTable.getValueAt(i, MyFirstTableModel.CODE_COLUMN)) {
-                                                baseTable.setValueAt(0, i, MyFirstTableModel.COUNT_COLUMN);
-                                                secondTable.removeRow(playGroundTable.getSelectedRow());
-                                            }
-                                        }
+        JMenuItem about = new JMenuItem("Рћ РЅР°СЃ");
+        about.setFont(font);
+        info.add(about);
+        about.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(frame, information);
+            }
+        });
+
+        menuBar.add(menu);
+        menuBar.add(file);
+        menuBar.add(info);
+        return menuBar;
+    }
+
+    private static JMenuItem createOpenSchemeMenuItem() {
+        JMenuItem openScheme = new JMenuItem("РћС‚РєСЂС‹С‚СЊ РїР»РѕС‰Р°РґРєСѓ");
+        openScheme.setFont(font);
+        openScheme.addActionListener(l -> {
+            String schemeFile = selectSchemeFile();
+            //if file was chosen
+            if (schemeFile != null) {
+
+                List<String> ignoreCodes = IgnoreCodesReader.getIgnoreCodes();
+                SchemeFileParser parser = new SchemeFileParser(ignoreCodes, baseExcel);
+                try {
+                    Playground schemePlayground = parser.
+                            parseFile(schemeFile);//TODO pass path as parameter
+
+//                secondTable = new MySecondTableModel(schemePlayground.getpGroundList());
+                    // РЎРѕР·РґР°РµРј РІС‚РѕСЂСѓСЋ С‚Р°Р±Р»РёС†Сѓ РґР»СЏ РїР»РѕС‰Р°РґРєРё Рё РІС‹РІРѕРґРёРј РЅР° СЌРєСЂР°РЅ.
+                    secondTableModel = new MySecondTableModel(schemePlayground.getElements());
+                    createSecondTable();
+                    secondTable.setModel(secondTableModel);
+                    panel.remove(sPane2);
+                    sPane2 = new JScrollPane(secondTable);
+                    //TODO count total price
+                    String text = "РћР±С‰Р°СЏ С†РµРЅР° РїР»РѕС‰Р°РґРєРё: " + schemePlayground.getPlayGroundPrise() + "РіСЂРЅ.";
+                    fullPrise.setText(text);
+                    sPane.updateUI();
+                    panel.add(sPane2, BorderLayout.EAST);
+                    panel.updateUI();
+
+                    //TODO replace original playground?
+                    playground = schemePlayground;
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        return openScheme;
+    }
+
+    private static String selectSchemeFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(rootFolder + "/schemes"));
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("playground scheme or scene file (*.scheme, *.scene)", "scheme", "scene");
+        fileChooser.setFileFilter(filter);
+        int returnVal = fileChooser.showOpenDialog(panel);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            return fileChooser.getSelectedFile().getAbsolutePath();
+        }
+        return null;
+    }
+
+    private static JMenuItem createOpenPriceMenuItem() {
+        JMenuItem openPrice = new JMenuItem("РћС‚РєСЂС‹С‚СЊ РїСЂР°Р№СЃ");
+        openPrice.setFont(font);
+        openPrice.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Runtime.getRuntime().exec("cmd /C " + FileUtil.getRootFolder() + "/Price.xls");
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+        return openPrice;
+    }
+
+    private static JMenuItem createPdfMenuItem() {
+        JMenuItem pdf = new JMenuItem("PDF");
+        pdf.setFont(font);
+        pdf.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                final JFrame frame2 = new JFrame();
+                Panel panel2 = new Panel();
+                GridLayout gridLayout = new GridLayout(5, 2);
+                panel2.setLayout(gridLayout);
+                frame2.setTitle("РРЅС„РѕСЂРјР°С†РёСЏ РґР»СЏ PDF С„Р°Р№Р»Р°."); // Р—Р°РіРѕР»РѕРІРѕРє РѕРєРЅР°.
+
+                panel2.add(new Label("РђРґСЂРµСЃ РґРѕСЃС‚Р°РІРєРё:"));
+                final JTextField addressField = new JTextField();
+                addressField.setText("РЎР°РјРѕРІС‹РІРѕР·");
+                panel2.add(addressField);
+                panel2.add(new Label("Р¦РµРЅР° РґРѕСЃС‚Р°РІРєРё (РіСЂРЅ.):"));
+                final JTextField priseSheepField = new JTextField();
+                panel2.add(priseSheepField);
+                priseSheepField.setText("0");
+                panel2.add(new Label("РЎРєРёРґРєР° (%):"));
+                final JTextField discount = new JTextField();
+                discount.setText("0");
+                panel2.add(discount);
+                panel2.add(new Label("РњРѕРЅС‚Р°Р¶ (%):"));
+                final JTextField workPrice = new JTextField();
+                workPrice.setText("15");
+                panel2.add(workPrice);
+                JButton ok = new JButton("РћРє");
+                panel2.add(ok);
+                ok.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        playground.setPosition(addressField.getText());
+                        playground.setPriceDelivery(Double.parseDouble(priseSheepField.getText()));
+                        playground.setDiscount(Double.parseDouble(discount.getText()));
+                        playground.setWorkPricePercent(Integer.parseInt(workPrice.getText()));
+
+                        final CreateFile createFile = new CreateFile(playground);
+                        createFile.createPDF();
+                        frame2.setVisible(false);
+                    }
+                });
+                JButton cancel = new JButton("РћС‚РјРµРЅР°");
+                panel2.add(cancel);
+                cancel.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        frame2.setVisible(false);
+                    }
+                });
+
+                frame2.getContentPane().add(panel2);
+                frame2.setPreferredSize(new Dimension(450, 150));
+                frame2.pack();
+                frame2.setLocationRelativeTo(null);
+                frame2.setVisible(true);
+            }
+        });
+        return pdf;
+    }
+
+    private static JMenuItem createExitMenuItem(JMenu menu) {
+        JMenuItem exitItem = new JMenuItem("Exit");
+        exitItem.setFont(font);
+        // РґР»СЏ Р·Р°РєСЂС‹С‚РёСЏ РїСЂРѕРіСЂР°РјРјС‹ РёР· РјРµРЅСЋ.
+        exitItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+        return exitItem;
+    }
+
+    private static void createSecondTable() {
+        secondTable = new JTable(secondTableModel);
+        secondTable.addFocusListener(new SecondTableFocusListener());
+        TableRowSorter<MySecondTableModel> sorter = new TableRowSorter<MySecondTableModel>(secondTableModel);
+        secondTable.setRowSorter(sorter);
+        secondTable.setRowHeight(80);
+    }
+
+
+    private static class FirstTableListener implements ListSelectionListener {
+
+        @Override
+        public void valueChanged(ListSelectionEvent event) {
+            List<Element> chosenElements = new ArrayList<Element>();
+            // Р’С‹Р±РёСЂР°РµРј СЌР»РµРјРµРЅС‚С‹ РІ С‚Р°Р±Р»РёС†Рµ, РєРѕР»РёС‡РµСЃС‚РІРѕ РєРѕС‚РѕСЂС‹С… РЅРµ СЂР°РІРЅРѕ РЅСѓР»СЋ.
+            List<Element> firstTableModelElements = firstTableModel.getElements();
+
+            while (firstTableModelElements.size() > count) {
+                Element element = firstTableModelElements.get(count);
+                if (element.getCount() > 0) {
+                    chosenElements.add(element);
+                    //baseTable.getCellRenderer(count,5).getTableCellRendererComponent(baseTable, 0, false, false, 5, 1).setBackground(Color.BLUE);
+                    //baseTable.getColumnModel().getColumn(5).setCellRenderer(renderer);
+                }
+
+                count++;
+            }
+
+            count = 0;
+            // Р”РѕР±Р°РІР»СЏРµРј СЌР»РµРјРµРЅС‚С‹ СЃ РєРѕР»РёС‡РµСЃС‚РІРѕРј Р±РѕР»СЊС€Рµ РЅСѓР»СЏ РІ РїР»РѕС‰Р°РґРєСѓ.
+            playground.setElements(chosenElements);
+            displaySecondTable();
+        }
+
+        private void displaySecondTable() {
+            // РЎРѕР·РґР°РµРј РІС‚РѕСЂСѓСЋ С‚Р°Р±Р»РёС†Сѓ РґР»СЏ РїР»РѕС‰Р°РґРєРё Рё РІС‹РІРѕРґРёРј РЅР° СЌРєСЂР°РЅ.
+            secondTableModel = new MySecondTableModel(playground.getElements());
+            createSecondTable();
+            panel.remove(sPane2);
+            sPane2 = new JScrollPane(secondTable);
+            panel.remove(fullPrise);
+            fullPrise = new JLabel("РћР±С‰Р°СЏ С†РµРЅР° РїР»РѕС‰Р°РґРєРё: " + Double.toString(playground.getPlayGroundPrise()) + "РіСЂРЅ.", JLabel.CENTER);
+            fullPrise.setFont(font2);
+            panel.add(fullPrise, BorderLayout.NORTH);
+            sPane.updateUI();
+            panel.add(sPane2, BorderLayout.EAST);
+            panel.updateUI();
+        }
+
+
+    }
+
+    private static class SecondTableFocusListener implements FocusListener {
+
+        @Override
+        public void focusGained(FocusEvent e) {
+            JTFFilter.setText("");
+            if (secondTable.getSelectedRow() != -1) {
+                int response = JOptionPane.showConfirmDialog(null, "Р’С‹ РґРµР№СЃС‚РІРёС‚РµР»СЊРЅРѕ С…РѕС‚РёС‚Рµ СѓР±СЂР°С‚СЊ СЌР»РµРјРµРЅС‚ РёР· РїР»РѕС‰Р°РґРєРё?");
+                if (response == 0) {
+                    String value = (String) secondTable.getValueAt(secondTable.getSelectedRow(), MyFirstTableModel.CODE_COLUMN);
+
+                    for (int i = 0; i <= firstTableModel.getElements().size() - 1; i++) {
+                        if (value == firstTableModel.getValueAt(i, MyFirstTableModel.CODE_COLUMN)) {
+                            firstTableModel.setValueAt(0, i, MyFirstTableModel.COUNT_COLUMN);
+                            secondTableModel.removeRow(secondTable.getSelectedRow());
+                        }
+                    }
 
 //                                    TableRowSorter<MySecondTableModel> sorter2 = new TableRowSorter<MySecondTableModel>(secondTable);
 //                                    playGroundTable.setRowSorter(sorter2);
 //                                    playGroundTable.setRowHeight(80);
-                                    panel.remove(sPane2);
-                                    sPane2 = new JScrollPane(playGroundTable);
-                                    panel.remove(fullPrise);
-                                    fullPrise = new JLabel("Общая цена площадки: " + Double.toString(playground.getPlayGroundPrise()) + "грн.", JLabel.CENTER);
-                                    fullPrise.setFont(font2);
-                                    panel.add(fullPrise, BorderLayout.NORTH);
+                    panel.remove(sPane2);
+                    sPane2 = new JScrollPane(secondTable);
+                    panel.remove(fullPrise);
+                    fullPrise = new JLabel("РћР±С‰Р°СЏ С†РµРЅР° РїР»РѕС‰Р°РґРєРё: " + Double.toString(playground.getPlayGroundPrise()) + "РіСЂРЅ.", JLabel.CENTER);
+                    fullPrise.setFont(font2);
+                    panel.add(fullPrise, BorderLayout.NORTH);
 
-                                    sPane.updateUI();
-                                    panel.add(sPane2, BorderLayout.EAST);
-                                    panel.updateUI();
-                                    baseTable.requestFocusInWindow();
-                                    } else {
-                                        baseTable.requestFocusInWindow();
-                                    }
-                                }
-                            }
-
-                            @Override
-                            public void focusLost(FocusEvent e) {
-//                                if (playGroundTable.getSelectedRow() != -1) {
-////                                    sPane.updateUI();
-////                                    panel.updateUI();
-//                                }
-
-                            }
-                        });
-
-                        TableRowSorter<MySecondTableModel> sorter2 = new TableRowSorter<MySecondTableModel>(secondTable);
-                        playGroundTable.setRowSorter(sorter2);
-                        playGroundTable.setRowHeight(80);
-                        panel.remove(sPane2);
-                        sPane2 = new JScrollPane(playGroundTable);
-                        panel.remove(fullPrise);
-                        fullPrise = new JLabel("Общая цена площадки: " + Double.toString(playground.getPlayGroundPrise()) + "грн.", JLabel.CENTER);
-                        fullPrise.setFont(font2);
-                        panel.add(fullPrise, BorderLayout.NORTH);
-                        sPane.updateUI();
-                        panel.add(sPane2, BorderLayout.EAST);
-                        panel.updateUI();
-                    }
-                });
-
-
-            JMenuItem openPrice = new JMenuItem("Открыть прайс");
-            openPrice.setFont(font);
-            menu.add(openPrice);
-            openPrice.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    try {
-                        Runtime.getRuntime().exec("cmd /C " + "/DolphinBase/Price.xls");
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
+                    sPane.updateUI();
+                    panel.add(sPane2, BorderLayout.EAST);
+                    panel.updateUI();
+                    firstTable.requestFocusInWindow();
+                } else {
+                    firstTable.requestFocusInWindow();
                 }
-            });
-
-        menu.addSeparator();
-
-            JMenuItem exitItem = new JMenuItem("Exit");
-            exitItem.setFont(font);
-            menu.add(exitItem);
-            // для закрытия программы из меню.
-            exitItem.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    System.exit(0);
-                }
-            });
-
-            JMenu file = new JMenu("Сохранить в файл");
-            file.setFont(font);
-
-            final CreateFile createFile = new CreateFile(playground, count);
-
-
-            JMenuItem pdf = new JMenuItem("PDF");
-            pdf.setFont(font);
-            file.add(pdf);
-            pdf.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    final JFrame frame2 = new JFrame();
-                    Panel panel2 = new Panel();
-                    GridLayout gridLayout = new GridLayout(5,2);
-                    panel2.setLayout(gridLayout);
-                    frame2.setTitle("Информация для PDF файла."); // Заголовок окна.
-
-                    panel2.add(new Label("Адрес доставки:"));
-                    final JTextField adressField = new JTextField();
-                    adressField.setText("Самовывоз");
-                    panel2.add(adressField);
-                    panel2.add(new Label("Цена доставки (грн.):"));
-                    final JTextField priseSheepField = new JTextField();
-                    panel2.add(priseSheepField);
-                    priseSheepField.setText("0");
-                    panel2.add(new Label("Скидка (%):"));
-                    final JTextField discount = new JTextField();
-                    discount.setText("0");
-                    panel2.add(discount);
-                    panel2.add(new Label("Монтаж (%):"));
-                    final JTextField workPrice = new JTextField();
-                    workPrice.setText("15");
-                    panel2.add(workPrice);
-                    JButton ok = new JButton("Ок");
-                    panel2.add(ok);
-                    ok.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            playground.setPosition(adressField.getText());
-                            playground.setPriceDelivery(Double.parseDouble(priseSheepField.getText()));
-                            playground.setDiscount(Double.parseDouble(discount.getText()));
-                            playground.setWorkPricePercent(Integer.parseInt(workPrice.getText()));
-
-                            createFile.createPDF();
-                            frame2.setVisible(false);
-                        }
-                    });
-                    JButton cancel = new JButton("Отмена");
-                    panel2.add(cancel);
-                    cancel.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            frame2.setVisible(false);
-                        }
-                    });
-
-                    frame2.getContentPane().add(panel2);
-                    frame2.setPreferredSize(new Dimension(450, 150));
-                    frame2.pack();
-                    frame2.setLocationRelativeTo(null);
-                    frame2.setVisible(true);
-                }
-            });
-
-            JMenu info = new JMenu("Информация");
-            info.setFont(font);
-
-            JMenuItem about = new JMenuItem("О нас");
-            about.setFont(font);
-            info.add(about);
-            about.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e){
-                    JOptionPane.showMessageDialog(frame, information);
-                }
-            });
-
-            menuBar.add(menu);
-            menuBar.add(file);
-            menuBar.add(info);
-            frame.setJMenuBar(menuBar);
-            frame.getContentPane().add(panel);
-            frame.setPreferredSize(new Dimension(1320, 700));
-            frame.pack(); // Для того что бы все элементы влезли в окно.
-            frame.setLocationRelativeTo(null);   //окно появляется в центре экрана, а не слева
-            frame.setVisible(true);
+            }
         }
+
+        @Override
+        public void focusLost(FocusEvent e) {
+
+        }
+
+    }
+
 }
+
 
