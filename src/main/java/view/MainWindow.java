@@ -12,8 +12,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.File;
@@ -93,7 +91,7 @@ public class MainWindow extends JFrame {
         panel.setLayout(layout);
 
         // Создаем первую таблицу с базой.
-        createFistTableAndModel(panel);
+        createFistTableAndModel();
         panel.add(sPane, BorderLayout.CENTER);
         // Поиск элементов в таблице с базой.
         panel.add(JTFFilter, BorderLayout.SOUTH);
@@ -122,11 +120,11 @@ public class MainWindow extends JFrame {
         frame.setVisible(true);
     }
 
-    private static void createFistTableAndModel(JPanel panel) {
+    private static void createFistTableAndModel() {
         firstTableModel = new MyFirstTableModel(baseExcel.getBaseList(), excelFile);
         firstTable = new JTable(firstTableModel);
         // Сортировка по названию.
-        final TableRowSorter<MyFirstTableModel> sorter = new TableRowSorter<MyFirstTableModel>(firstTableModel);
+        final TableRowSorter<MyFirstTableModel> sorter = new TableRowSorter<>(firstTableModel);
         JTFFilter.getDocument().addDocumentListener(new Search(JTFFilter, sorter));
         firstTable.setRowSorter(sorter);
         firstTable.setRowHeight(80);
@@ -149,7 +147,7 @@ public class MainWindow extends JFrame {
         JMenuItem openScheme = createOpenSchemeMenuItem();
         menu.add(openScheme);
         menu.addSeparator();
-        JMenuItem exitItem = createExitMenuItem(menu);
+        JMenuItem exitItem = createExitMenuItem();
         menu.add(exitItem);
 
         JMenu file = new JMenu("Сохранить в файл");
@@ -164,11 +162,7 @@ public class MainWindow extends JFrame {
         JMenuItem about = new JMenuItem("О нас");
         about.setFont(font);
         info.add(about);
-        about.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(frame, information);
-            }
-        });
+        about.addActionListener(e -> JOptionPane.showMessageDialog(frame, information));
 
         menuBar.add(menu);
         menuBar.add(file);
@@ -230,50 +224,46 @@ public class MainWindow extends JFrame {
     private static JMenuItem createOpenPriceMenuItem() {
         JMenuItem openPrice = new JMenuItem("Открыть прайс");
         openPrice.setFont(font);
-        openPrice.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    Runtime.getRuntime().exec("cmd /C " + FileUtil.getRootFolder() + "/Price.xls");
-                } catch (IOException e1) {
-                    e1.printStackTrace();
+        openPrice.addActionListener(e -> {
+                    try {
+                        Runtime.getRuntime().exec("cmd /C " + FileUtil.getRootFolder() + "/Price.xls");
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
                 }
-            }
-        });
+        );
         return openPrice;
     }
 
     private static JMenuItem createPdfMenuItem() {
         JMenuItem pdf = new JMenuItem("PDF");
         pdf.setFont(font);
-        pdf.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                final JFrame frame2 = new JFrame();
-                Panel panel2 = new Panel();
-                GridLayout gridLayout = new GridLayout(5, 2);
-                panel2.setLayout(gridLayout);
-                frame2.setTitle("Информация для PDF файла."); // Заголовок окна.
+        pdf.addActionListener(e -> {
+                    final JFrame frame2 = new JFrame();
+                    Panel panel2 = new Panel();
+                    GridLayout gridLayout = new GridLayout(5, 2);
+                    panel2.setLayout(gridLayout);
+                    frame2.setTitle("Информация для PDF файла."); // Заголовок окна.
 
-                panel2.add(new Label("Адрес доставки:"));
-                final JTextField addressField = new JTextField();
-                addressField.setText("Самовывоз");
-                panel2.add(addressField);
-                panel2.add(new Label("Цена доставки (грн.):"));
-                final JTextField priseSheepField = new JTextField();
-                panel2.add(priseSheepField);
-                priseSheepField.setText("0");
-                panel2.add(new Label("Скидка (%):"));
-                final JTextField discount = new JTextField();
-                discount.setText("0");
-                panel2.add(discount);
-                panel2.add(new Label("Монтаж (%):"));
-                final JTextField workPrice = new JTextField();
-                workPrice.setText("15");
-                panel2.add(workPrice);
-                JButton ok = new JButton("Ок");
-                panel2.add(ok);
-                ok.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
+                    panel2.add(new Label("Адрес доставки:"));
+                    final JTextField addressField = new JTextField();
+                    addressField.setText("Самовывоз");
+                    panel2.add(addressField);
+                    panel2.add(new Label("Цена доставки (грн.):"));
+                    final JTextField priseSheepField = new JTextField();
+                    panel2.add(priseSheepField);
+                    priseSheepField.setText("0");
+                    panel2.add(new Label("Скидка (%):"));
+                    final JTextField discount = new JTextField();
+                    discount.setText("0");
+                    panel2.add(discount);
+                    panel2.add(new Label("Монтаж (%):"));
+                    final JTextField workPrice = new JTextField();
+                    workPrice.setText("15");
+                    panel2.add(workPrice);
+                    JButton ok = new JButton("Ок");
+                    panel2.add(ok);
+                    ok.addActionListener(event -> {
                         playground.setPosition(addressField.getText());
                         playground.setPriceDelivery(Double.parseDouble(priseSheepField.getText()));
                         playground.setDiscount(Double.parseDouble(discount.getText()));
@@ -282,43 +272,33 @@ public class MainWindow extends JFrame {
                         final CreateFile createFile = new CreateFile(playground);
                         createFile.createPDF();
                         frame2.setVisible(false);
-                    }
-                });
-                JButton cancel = new JButton("Отмена");
-                panel2.add(cancel);
-                cancel.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        frame2.setVisible(false);
-                    }
-                });
+                    });
+                    JButton cancel = new JButton("Отмена");
+                    panel2.add(cancel);
+                    cancel.addActionListener(ev -> frame2.setVisible(false));
 
-                frame2.getContentPane().add(panel2);
-                frame2.setPreferredSize(new Dimension(450, 150));
-                frame2.pack();
-                frame2.setLocationRelativeTo(null);
-                frame2.setVisible(true);
-            }
-        });
+                    frame2.getContentPane().add(panel2);
+                    frame2.setPreferredSize(new Dimension(450, 150));
+                    frame2.pack();
+                    frame2.setLocationRelativeTo(null);
+                    frame2.setVisible(true);
+                }
+        );
         return pdf;
     }
 
-    private static JMenuItem createExitMenuItem(JMenu menu) {
+    private static JMenuItem createExitMenuItem() {
         JMenuItem exitItem = new JMenuItem("Exit");
         exitItem.setFont(font);
         // для закрытия программы из меню.
-        exitItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        });
+        exitItem.addActionListener(e -> System.exit(0));
         return exitItem;
     }
 
     private static void createSecondTable() {
         secondTable = new JTable(secondTableModel);
         secondTable.addFocusListener(new SecondTableFocusListener());
-        TableRowSorter<MySecondTableModel> sorter = new TableRowSorter<MySecondTableModel>(secondTableModel);
+        TableRowSorter<MySecondTableModel> sorter = new TableRowSorter<>(secondTableModel);
         secondTable.setRowSorter(sorter);
         secondTable.setRowHeight(80);
     }
